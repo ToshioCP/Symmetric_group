@@ -1,9 +1,9 @@
 # demo2.rb
 # It shows all the subgroups of S4
-# It takes about 47 seconds on my laptop (Core-i7)
+# It takes about 3 seconds on my laptop (Core-i7)
 
 # 4次対称群のすべての部分群を表示するプログラム
-# 計算に約47秒（Core-i7のノートPCで）
+# 計算に約3秒（Core-i7のノートPCで）
 
 require 'benchmark'
 include Benchmark
@@ -16,6 +16,7 @@ def find_supergroup(group)
   diff.each do |q|
     pset = PSet.new(group.to_a) + PSet.new([q])
     supergroup = PGroup.new(pset)
+    next if @subgroups.include?(supergroup)
     @subgroups << supergroup
     find_supergroup(supergroup)
   end
