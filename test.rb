@@ -24,17 +24,22 @@ raise "mapsto didn't work." unless a.mapsto(4) == 3
 
 raise "multiplication didn't work." unless a == b*c
 
+raise "to_s_c didn't work." unless a.to_s_c == "[1,2,5][3,4]"
 raise "to_s_c didn't work." unless b.to_s_c == "[1,2,5]"
 raise "to_s_c didn't work." unless c.to_s_c == "[3,4]"
-raise "to_s_c didn't work." unless a.to_s_c == "[1,2,5][3,4]"
 
-p=PSet.new [a,b]
-q=PSet.new [c]
-raise "multiplication on PSet didn't work." unless p*q == PSet.new([Permutation.new([2,5,3,4,1]),Permutation.new([2,5,4,3,1])])
-raise "multiplication on Permutation with PSet didn't work." unless a*p == PSet.new([Permutation.new([5,1,3,4,2]),Permutation.new([5,1,4,3,2])])
-raise "multiplication on PSet with Permutation didn't work." unless p*a == PSet.new([Permutation.new([5,1,3,4,2]),Permutation.new([5,1,4,3,2])])
+sg = Symmetric_group.new(5)
+raise "method degree on Symmetric_group didn't work." unless sg.degree == 5
+i=sg.index(a)
+j=sg.index(b)
+k=sg.index(c)
+raise "method mul on Symmetric_group didn't work." unless sg.mul([i,j],[k]) == [sg.index([2,5,3,4,1]),sg.index([2,5,4,3,1])].sort
+raise "method mul on Symmetric_group didn't work." unless sg.mul(i,[i,j]) == [sg.index([5,1,3,4,2]),sg.index([5,1,4,3,2])].sort
+raise "method mul on Symmetric_group didn't work." unless sg.mul([i,j],i) == [sg.index([5,1,3,4,2]),sg.index([5,1,4,3,2])].sort
+raise "Group generation didn't work." unless sg.gen_group([sg.index([2,1,3,4,5])]) == [sg.index([2,1,3,4,5]),sg.index([1,2,3,4,5])].sort
+raise "method to_s_c on Symmetric_group didn't work." unless sg.to_s_c(i) == "[1,2,5][3,4]"
+raise "method to_s_c on Symmetric_group didn't work." unless sg.to_s_c([j,k]) == "[[1,2,5],[3,4]]"
 
-raise "Group generation didn't work." unless PGroup.new(PSet.new([Permutation.new([2,1,3,4,5])])) == PSet.new([Permutation.new([2,1,3,4,5]),Permutation.new([1,2,3,4,5])])
 
 print "The test has been completed.\n"
 print "All the methods has worked.\n"

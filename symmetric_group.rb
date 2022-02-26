@@ -213,87 +213,123 @@ class Permutation < Array
 
 end
 
-# PSetUtils has methdos for PSet and PGroup classes
+# n-degree symmetric group, which is a group consists of all the n-permutations.
+# It is a sorted array of the permutations. 
+# The elements (permutations) of the array are referenced by the index.
+#   sg: an instance of Symmetric_group class, p: an instance of Permutation class
+#   a permutation to an index => sg.index(p)
+#   an index to a permutation => sg[i]
+# So, a premutation and its index can be seen as the same thing. 
+# An instance of the Symmetric_group class makes a Ceyley table in it.
+# Multiplication of permutations can be calculated fast with the table.
 
-# PSetとPGroupクラスのためのモジュール
-module PSetUtils
-  def to_s_c
-    return "[]" if self.empty?
-    a=self.to_a
-    n=a.size
-    c="[#{a[0].to_s_c}"
-    1.upto(n-1) do |i|
-      c << ",#{a[i].to_s_c}"
+
+
+# n次対称群。長さnの置換全体を配列の順にしたがって整列したもの。
+# この群に含まれる置換は、配列の添字と1対1に対応する。
+#   sg: Symmetric_groupクラスのインスタンス, p: Permutationクラスのインスタンス
+#   a permutation to an index => sg.index(p)
+#   an index to a permutation => sg[i]
+# インスタンスは生成されるときに演算表を内部に作る。
+# 演算表を用いてることにより、高速に置換の積を計算することができる。
+class Symmetric_group < Array
+  # Symmetric_group.new(2) => [[1,2],[2,1]] 
+  def initialize n
+    raise "Illegal argument." unless n.instance_of? Integer
+    raise "Illegal argument." unless n >= 1
+    super (1..n).to_a.permutation.sort.map {|p| Permutation.new(p)}
+    @degree = n
+
+    # Create a Cayley table (a table arranging all the produts of the group's elements)
+    # 乗算表の作成
+    n = self.size
+    @table = Array.new(n){Array.new(n)}
+    (0 .. n-1).each do |i|
+      (0 .. n-1).each do |j|
+        @table[i][j] = self.index self[i]*self[j]
+      end
     end
-    c << "]"
-    c
+  self.freeze
+  @table.freeze
   end
-end
 
-# PSet is a set of permutations.
-
-# 置換の集合
-class PSet < Set
-  include PSetUtils
-  # PSet.new([p1,p2,p3]) => [p1,p2,p3] p1,vp2, p3 are Permutation instances.
-  # PSet.new([]) => []
-
-  # PSet.new([p1,p2,p3]) => [p1,p2,p3] p1,vp2, p3 は置換のインスタンス
-  # PSet.new([]) => []
-  def initialize a
-    raise "Illegal argument" unless a.instance_of? Array
-    a.each do |p|
-      raise "Illegal argument" unless p.instance_of? Permutation
-    end
-    if a == []
-      super
-    else
-      super(a)
-    end
+  def degree
+    @degree
   end
 
-  # PQ={pq|p in P, q in Q}
-  # Pq={pq| p in P}
-  # pQ is defined in the Permutation class.
-
-  # PQ={pq|p in P, q in Q}
-  # Pq={pq| p in P}
-  # pQはPermutationの演算として定義する。
-  def *(other)
-    raise "Illegal argument" unless other.instance_of?(PSet) || other.instance_of?(Permutation)
-    pq=PSet.new []
-    self.each do |p|
-      if other.instance_of? PSet
-        other.each do |q|
-          pq << p*q
-        end
+  # Multiplication. The two arguments are indecies of permutations, or subsets of the symmetric group.
+  # 乗算。2つの引数はインデックス（正の整数）で表された置換、または対称群の部分集合。
+  def mul a,b
+    n = self.size
+    raise "Illegal argument." unless a.instance_of?(Integer) || a.instance_of?(Array)
+    raise "Illegal argument." unless b.instance_of?(Integer) || b.instance_of?(Array)
+    if a.instance_of? Integer
+      raise "Illegal argument." unless (0 .. n-1).include? a
+    end
+    if b.instance_of? Integer
+      raise "Illegal argument." unless (0 .. n-1).include? b
+    end
+    if a.instance_of? Array
+      a.each {|i| raise "Illegal argument." unless (0 .. n-1).include? i}
+    end
+    if b.instance_of? Array
+      b.each {|j| raise "Illegal argument." unless (0 .. n-1).include? j}
+    end
+    if a.instance_of? Integer
+      if b.instance_of? Integer
+        @table[a][b]
       else
-        pq << p*other
+        b.map{|j| @table[a][j]}.uniq.sort
+      end
+    else
+      if b.instance_of? Integer
+        a.map{|i| @table[i][b]}.uniq.sort
+      else
+        m = []
+        a.each do |i|
+          m += b.map{|j| @table[i][j]}.uniq.sort
+        end
+        m
       end
     end
-    pq
   end
-end
 
-# PGroup is a subgroup of S_n (n-degree symmetric group).
+  # Generate a group from a set
 
-# PGroupはn次対称群の部分群
-class PGroup < Set
-  include PSetUtils
-  # PGroup.new(pset): pset is an instance of PSet. PGroup.new creates <pset>, which is the minimum group contains pset.
-  # Note: Suppose A is a finite subset of a group G. If AA=A, then A is a subgroup of G.
+  # 集合から群を生成。
+  def gen_group subset
+    n = self.size
+    raise "Illegal argument." unless subset.instance_of? Array
+    raise "Illegal argument." if subset == []
+    subset.each do |i|
+      raise "Illegal argument." unless i.instance_of? Integer
+      raise "Illegal argument." unless (0 .. n-1).include? i
+    end
+    group = subset.sort
+    s = []
+    until s == group
+      s = (s+group).uniq.sort
+      group = self.mul(s,s).uniq.sort
+    end
+    group
+  end
 
-  # PGroup.new(pset): psetはPSetインスタンス。PGroup.newはpsetによって生成される部分群<pset>（psetを含む最小の部分群）を生成する。
-  # 注：Aを群Gの有限部分集合とする。AA=Aが成り立つならば、AはGの部分群である。
-  def initialize pset
-    raise "Illegal argument" unless pset.instance_of? PSet
-    if pset == []
-      super
+  # Create a string which expresses the permutation as a product of cycles.
+
+  # 巡回置換の積の形で表現した文字列を生成
+  def to_s_c a
+    n = self.size
+    raise "Illegal argument." unless a.instance_of?(Integer) || a.instance_of?(Array)
+    if a.instance_of? Integer
+      raise "Illegal argument." unless (0 .. n-1).include? a
     else
-      until pset == (sp = pset*pset)
-        pset += sp
-      end
-      super(pset)
+      a.each {|i| raise "Illegal argument." unless (0 .. n-1).include? i}
+    end
+    if a.instance_of? Integer
+      self[a].to_s_c
+    else
+      s = a.map{|i| self[i].to_s_c}
+      "["+s.join(",")+"]"
     end
   end
 end

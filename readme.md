@@ -24,6 +24,7 @@ Ruby 2.7.4 or later
 
 1. Start the terminal and move the current directory to the directory where you unzipped the zip file.
 2. Type: ruby demo.rb
+3. demo2.rb prints all the subgroups of S5. It takes about 80 seconds. (Core-i7 laptop)
 
 ### License
 
@@ -58,6 +59,7 @@ Ruby 2.7.4 またはそれ以降のバージョン
 
 1. 解凍したフォルダで端末（コマンドライン）を起動する。
 2. ruby demo.rb とタイプする。
+3. demo2.rbは5次対称群のすべての部分群を表示します。約80秒かかります。（Core-i7のノートPCで）
 
 ### ライセンス
 
