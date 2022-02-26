@@ -27,7 +27,6 @@ def find_subgroups n
   @sg_indecies = (0 .. @sg.size-1).to_a
   @subgroups = []
   @sg_indecies.each do |i|
-p i
     next if i == 0
     pset = [i]
     group = @sg.gen_group(pset)
