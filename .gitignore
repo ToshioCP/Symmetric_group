@@ -1,3 +1,5 @@
 # Ignore all backupfiles made by gedit
 *~
-
+C/temp
+C/a.out
+C/symgr6.txt

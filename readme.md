@@ -11,9 +11,20 @@ The program symmetric_group.rb is a library for dealing with the n-degree symmet
 There's a demo program demo.rb.
 Try it so that you will get what the program does.
 
+A similar C programs are under the C directory.
+There are shell files that compile C programs.
+For example, the following compiles demo.c and executes the program.
+
+~~~
+$ bash demo.sh
+$ ./a.out
+~~~
+
 ### Prerequisites
 
-Ruby 2.7.4 or later
+- Linux OS
+- Ruby 2.7.4 or later
+- gcc
 
 ### installation
 
@@ -46,9 +57,20 @@ See the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html) 
 デモプログラム「demo.rb」があるので、走らせてみてください。
 雰囲気はわかると思います。
 
+同様のC言語で書かれたプログラムがCディレクトリ以下に収められています。
+そのプログラムをコンパイルするシェルファイルもあります。
+例えば、次の操作はdemo.cをコンパイルし、実行コードを呼び出します。
+
+~~~
+$ bash demo.sh
+$ ./a.out
+~~~
+
 ### 動作条件
 
-Ruby 2.7.4 またはそれ以降のバージョン
+- Linux OS
+- Ruby 2.7.4 またはそれ以降のバージョン
+- gcc
 
 ### インストール
 

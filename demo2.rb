@@ -10,28 +10,30 @@ include Benchmark
  
 require './symmetric_group.rb'
 
-def find_supergroup(group)
-  return if group == @sg_indecies
-  diff = @sg_indecies - group
+def find_supergroup(group, elements)
+  return if group.size*2 >= @sg_indecies.size
+  diff = elements - group
   diff.each do |q|
     pset = group.union([q])
     supergroup = @sg.gen_group(pset)
     next if @subgroups.include?(supergroup)
     @subgroups << supergroup
-    find_supergroup(supergroup)
+    elements = elements - [q]
+    find_supergroup(supergroup, elements)
   end
 end
 
 def find_subgroups n
   @sg = Symmetric_group.new(n)
-  @sg_indecies = (0 .. @sg.size-1).to_a
+  elements = @sg_indecies = (0 .. @sg.size-1).to_a
   @subgroups = []
   @sg_indecies.each do |i|
     next if i == 0
     pset = [i]
     group = @sg.gen_group(pset)
     @subgroups << group
-    find_supergroup group
+    elements = elements - pset
+    find_supergroup group, elements
   end
   @subgroups << [0]
   @subgroups = @subgroups.uniq.sort {|a,b| a.size <=> b.size}

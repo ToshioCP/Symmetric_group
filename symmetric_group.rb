@@ -257,6 +257,10 @@ class Symmetric_group < Array
     @degree
   end
 
+  def cayley_table
+    @table
+  end
+
   # Multiplication. The two arguments are indecies of permutations, or subsets of the symmetric group.
   # 乗算。2つの引数はインデックス（正の整数）で表された置換、または対称群の部分集合。
   def mul a,b
