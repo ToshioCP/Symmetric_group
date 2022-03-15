@@ -42,25 +42,21 @@ printf ("set_is_subgroup\n");
     printf ("set_create_set didn't work. (1)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (1)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (3,2,a2)) == NULL)
     printf ("set_create_set didn't work. (2)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (2)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (3,3,a3)) == NULL)
     printf ("set_create_set didn't work. (3)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (3)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (3,6,a4)) == NULL)
     printf ("set_create_set didn't work. (4)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (4)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (3,2,a5)) == NULL)
     printf ("set_create_set didn't work. (5)\n");
@@ -74,19 +70,16 @@ printf ("set_is_subgroup\n");
     printf ("set_create_set didn't work. (6)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (6)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (4,2,b2)) == NULL)
     printf ("set_create_set didn't work. (7)\n");
   if (set_is_subgroup (set1) != 0)
     printf ("set_is_subgroup didn't work. (7)\n");
-  set_free_set (set1);
 
   if ((set1 = set_create_set (4,8,b3)) == NULL)
     printf ("set_create_set didn't work. (8)\n");
   if (set_is_subgroup (set1) != 1)
     printf ("set_is_subgroup didn't work. (8)\n");
-  set_free_set (set1);
 printf ("set_create_symgr\n");
   int i, j, f, *a;
   for (i=1; i<MAX_DEGREE; ++i) {
@@ -102,8 +95,6 @@ printf ("set_create_symgr\n");
       printf ("set_create_set didn't work. (symgr_set2-%d)\n", i);
     if (set_cmp (set1, set2) != 0)
       printf ("set_create_symgr didn't work. (%d)\n", i);
-    set_free_set (set1);
-    set_free_set (set2);
   }
 printf ("set_append\n");
   int c1[3]={4,8,10};
@@ -149,37 +140,60 @@ printf ("set_gen_group\n");
     printf ("set_create_set didn't work. (set_gen_group 1)\n");
   if ((set2 = set_gen_group (set1)) == NULL)
     printf ("set_gen_group didn't work. (1)\n");
-  set_free_set (set1);
   if ((set1 = set_create_set (5,2,d2)) == NULL)
     printf ("set_create_set didn't work. (set_gen_group 2)\n");
   if (set_cmp(set1, set2) != 0)
     printf ("set_gen_group didn't work. (2)\n");
-  set_free_set (set1);
-  set_free_set (set2);
 
   if ((set1 = set_create_set (4,2,d3)) == NULL)
     printf ("set_create_set didn't work. (set_gen_group 3)\n");
   if ((set2 = set_gen_group (set1)) == NULL)
     printf ("set_gen_group didn't work. (3)\n");
-  set_free_set (set1);
   if ((set1 = set_create_set (4,8,d4)) == NULL)
     printf ("set_create_set didn't work. (set_gen_group 4)\n");
   if (set_cmp(set1, set2) != 0)
     printf ("set_gen_group didn't work. (4)\n");
-  set_free_set (set1);
-  set_free_set (set2);
 
   if ((set1 = set_create_set (4,2,d5)) == NULL)
     printf ("set_create_set didn't work. (set_gen_group 5)\n");
   if ((set2 = set_gen_group (set1)) == NULL)
     printf ("set_gen_group didn't work. (5)\n");
-  set_free_set (set1);
   if ((set1 = set_create_symgr (4)) == NULL)
     printf ("set_create_symgr didn't work. (set_gen_group 1)\n");
   if (set_cmp(set1, set2) != 0)
     printf ("set_gen_group didn't work. (6)\n");
-  set_free_set (set1);
-  set_free_set (set2);
+printf ("gen_cyclic_group\n");
+  int e1[2]={0,1};
+  int e2[3]={0,30,48}; /* cycles id, (1,2,3),(1,3,2) */
+  int e3[4]={0,32,60,72}; /* cycles id, (1,2,3,4),(1,3)(2,4), (1,4,3,2) */
+  int e4[5]={0,33,64,90,96}; /* cycles id,(1,2,3,4,5),(1,3,5,2,4),(1,4,2,5,3),(1,5,4,3,2) */
+  if ((set1 = gen_cyclic_group (5,1)) == NULL)
+    printf ("gen_cyclic_group didn't work. 1\n");
+  if ((set2 = set_create_set (5,2,e1)) == NULL)
+    printf ("set_create_set didn't work. (gen_cyclic_group 1)\n");
+  if (set_cmp(set1, set2) != 0)
+    printf ("gen_cyclic_group didn't work. 2\n");
+
+  if ((set1 = gen_cyclic_group (5,30)) == NULL)
+    printf ("gen_cyclic_group didn't work. 3\n");
+  if ((set2 = set_create_set (5,3,e2)) == NULL)
+    printf ("set_create_set didn't work. (gen_cyclic_group 2)\n");
+  if (set_cmp(set1, set2) != 0)
+    printf ("gen_cyclic_group didn't work. 4\n");
+
+  if ((set1 = gen_cyclic_group (5,32)) == NULL)
+    printf ("gen_cyclic_group didn't work. 5\n");
+  if ((set2 = set_create_set (5,4,e3)) == NULL)
+    printf ("set_create_set didn't work. (gen_cyclic_group 3)\n");
+  if (set_cmp(set1, set2) != 0)
+    printf ("gen_cyclic_group didn't work. 6\n");
+
+  if ((set1 = gen_cyclic_group (5,33)) == NULL)
+    printf ("gen_cyclic_group didn't work. 7\n");
+  if ((set2 = set_create_set (5,5,e4)) == NULL)
+    printf ("set_create_set didn't work. (gen_cyclic_group 4)\n");
+  if (set_cmp(set1, set2) != 0)
+    printf ("gen_cyclic_group didn't work. 8\n");
 
 /* list */
 printf ("list_append & list_lookup\n");

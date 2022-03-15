@@ -10,32 +10,27 @@ include Benchmark
  
 require './symmetric_group.rb'
 
-def find_supergroup(group, elements)
-  return if group.size*2 >= @sg_indecies.size
-  diff = elements - group
-  diff.each do |q|
-    pset = group.union([q])
-    supergroup = @sg.gen_group(pset)
-    next if @subgroups.include?(supergroup)
-    @subgroups << supergroup
-    elements = elements - [q]
-    find_supergroup(supergroup, elements)
+def find_supergroup(cgroups)
+  n = cgroups.size
+  return if cgroups == [@sg_indecies]
+  groups = []
+  cgroups.combination(2) do |s,t|
+    u = (s+t).uniq
+    gr = @sg.gen_group(u).sort
+    groups << gr
   end
+  groups = groups.sort.uniq
+  @subgroups += groups
+  find_supergroup groups
 end
 
 def find_subgroups n
   @sg = Symmetric_group.new(n)
-  elements = @sg_indecies = (0 .. @sg.size-1).to_a
-  @subgroups = []
-  @sg_indecies.each do |i|
-    next if i == 0
-    pset = [i]
-    group = @sg.gen_group(pset)
-    @subgroups << group
-    elements = elements - pset
-    find_supergroup group, elements
-  end
-  @subgroups << [0]
+  @sg_indecies = (0 .. @sg.size-1).to_a
+  cgroups = @sg_indecies.map {|i| @sg.gen_cyclic_group(i).sort}
+  cgroups = cgroups.sort.uniq
+  @subgroups = cgroups.dup
+  find_supergroup cgroups-[[0]]
   @subgroups = @subgroups.uniq.sort {|a,b| a.size <=> b.size}
   print "The number of subgroups is #{@subgroups.size}.\n"
   print "生成された全部分群（#{@subgroups.size}個）\n"

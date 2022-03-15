@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "permutation.h"
+#include "cayley.h"
 #include "subset.h"
 
 /* yes=>1, no->0, error^>-1 */
@@ -24,6 +25,8 @@ subset *
 set_create_symgr (int degree) {
   int i, f, *a;
 
+  if (degree <= 0 || degree > MAX_DEGREE)
+    return NULL;
   f = fact (degree);
   a = (int *) malloc (sizeof(int)*f);
   for (i=0; i<f; ++i)
@@ -133,6 +136,34 @@ set_gen_group (subset *set) {
   return set2;
 }
 
+static int
+int_array_cmp (int *a, int *b) {
+  return *a - *b;
+}
+
+subset *
+gen_cyclic_group (int degree, int i) {
+  int j, k, f, *a;
+  subset *set;
+
+  if (degree < 1 || degree > MAX_DEGREE)
+    return NULL;
+  if (i < 0 || i >= fact (degree))
+    return NULL;
+  f = fact(degree); /* f can be smaller, but I couldn't find it. */
+  a = (int *) malloc (sizeof(int)*f);
+  *a = 0;
+  for (j=i,k=1; j!=0 && k<f; j=mul_pp(degree, j, i), ++k)
+    *(a+k) = j;
+  if (j != 0) {
+    free (a);
+    return NULL;
+  }
+  qsort ((void *)a, k, sizeof(int), (int (*)(const void *, const void *)) int_array_cmp);
+  set = set_create_set (degree, k, a);
+  free (a);
+  return set;
+}
 
 typedef struct _list list;
 struct _list {
@@ -146,7 +177,7 @@ subset *
 list_lookup (const subset *set) {
   list *l;
 
-  for (l=&list_start; l->next != NULL; l=l->next)
+  for (l=&list_start; l->next!=NULL; l=l->next)
     if (l->next->set == set)
       break;
   if (l->next == NULL)
@@ -279,31 +310,91 @@ list_each (void (* func) (subset *)) {
     func (l->next->set);
 }
 
+static subset *
+lookup (list *start, const subset *set) {
+  list *l;
+
+  if (start == NULL)
+    return NULL;
+  for (l=start; l->next!=NULL; l=l->next)
+    if (l->next->set == set)
+      break;
+  if (l->next == NULL)
+    return NULL;
+  else
+    return l->next->set;
+}
+
+static subset *
+append (list *start, subset *set) {
+  list *l;
+  subset *set1;
+
+  if (start == NULL)
+    return NULL;
+  if ((set1 = lookup (start, set)) != NULL)
+    return set1;
+  for (l=start; l->next!=NULL; l=l->next)
+    ;
+  l->next = (list *) malloc (sizeof(list));
+  l->next->next = NULL;
+  l->next->set = set;
+  return l->next->set;
+}
+
+/* error => -1 */
+static int
+lsize (list *start) {
+  int i;
+  list *l;
+
+  if (start == NULL)
+    return -1;
+  for (i=0,l=start; l->next!=NULL; l=l->next)
+    ++i;
+  return i;
+}
+
+static void
+free_all (list *l) {
+  if (l == NULL || l->next == NULL)
+    return;
+  else {
+    free_all (l->next);
+    free (l->next);
+    l->next = NULL;
+  }
+}
+
 /* find intermediate groups between symgr and set. */
 
 /* symgrとsetの中間群を探す */
 static void
-find_intermediate_group (const subset *symgr, const subset *set, subset *set0) {
-  int i, n, *array;
+find_intermediate_group (const int n, list *start) {
+  int i, j;
   subset *set1, *set2, *set3;
+  list *l1, *l2, cgroups = {NULL, NULL};
 
-  if (set_get_size (set) * 2 >= set_get_size (symgr))
+  if (lsize (start) == 1)
     return;
-  n = set_get_size (set0);
-  array = set_get_array (set0);
-  if (n == 0) /* empty set */
+  if (start == NULL || start->next == NULL)
     return;
-  for (i=0,set3=set0; i<n; ++i) {
-    if ((set1 = set_append (set, *(array+i))) == NULL)
-      return;
-    if ((set2 = set_gen_group (set1)) == NULL)
-      return;
-    set3 = set_remove (set3, *(array+i));
-    if (list_lookup (set2) == set2)
-      continue;
-    list_append (set2);
-    find_intermediate_group (symgr, set2, set_subtract (set3, set2));
-  }      
+  for (l1=start; l1->next!=NULL; l1=l1->next)
+    for (l2=l1->next; l2->next!=NULL; l2=l2->next) {
+      if ((set1 = set_union (l1->next->set, l2->next->set)) == NULL) {
+        free_all (&cgroups);
+        return;
+      }
+      if ((set2 = set_gen_group(set1)) == NULL) {
+        free_all (&cgroups);
+        return;
+      }
+      append (&cgroups, set2);
+    }
+  for (l1=&cgroups; l1->next!=NULL; l1=l1->next)
+    list_append (l1->next->set);
+  find_intermediate_group (n, &cgroups);
+  free_all (&cgroups);
 }
 
 /* Find all the subgroups of the n-degree symmetric group. */
@@ -311,10 +402,11 @@ find_intermediate_group (const subset *symgr, const subset *set, subset *set0) {
 /* n次対称群のすべての部分群を求める。 */
 void
 find_subgroups (const int n) {
-  int a[1];
+  int a[1], i, f;
   subset *set1, *symgr, *set2;
+  list cgroups = {NULL, NULL}, *l;
 
-  if (n <= 0 || n > MAX_DEGREE)
+  if (n < 1 || n > MAX_DEGREE)
     return;
   if ((symgr = set_create_symgr (n)) == NULL)
     return;
@@ -323,8 +415,17 @@ find_subgroups (const int n) {
   if ((set1 = set_create_set (n, 1, a)) == NULL)
     return;
   list_append (set1);
-  if ((set2 = set_subtract (symgr, set1)) == NULL)
-    return;
-  find_intermediate_group (symgr, set1, set2);
+  f = fact (n);
+  for (i=1; i<f; ++i) {
+    if ((set1 = gen_cyclic_group (n, i)) == NULL) {
+      free_all (&cgroups);
+      return;
+    }
+    append (&cgroups, set1);
+  }
+  for (l=&cgroups; l->next!=NULL; l=l->next)
+    list_append (l->next->set);
+  find_intermediate_group (n, &cgroups);
+  free_all (&cgroups);
 }
 

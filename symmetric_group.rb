@@ -318,6 +318,24 @@ class Symmetric_group < Array
     group
   end
 
+  # Generate a cyclic group from an element of the symmetric group.
+  # The element is an integer that is the index of the permutation.
+
+  # 要素から巡回群を生成。
+  # 要素は順列のインデックス表現。
+  def gen_cyclic_group i
+    n = self.size
+    raise "Illegal argument." unless i.instance_of? Integer
+    raise "Illegal argument." unless (0 .. n-1).include? i
+    c = [0]
+    j = i # unit element (id)
+    until j == 0
+      c << j
+      j = self.mul j,i
+    end
+    c.sort
+  end
+
   # Create a string which expresses the permutation as a product of cycles.
 
   # 巡回置換の積の形で表現した文字列を生成

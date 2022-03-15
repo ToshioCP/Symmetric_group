@@ -37,6 +37,7 @@ raise "method mul on Symmetric_group didn't work." unless sg.mul([i,j],[k]) == [
 raise "method mul on Symmetric_group didn't work." unless sg.mul(i,[i,j]) == [sg.index([5,1,3,4,2]),sg.index([5,1,4,3,2])].sort
 raise "method mul on Symmetric_group didn't work." unless sg.mul([i,j],i) == [sg.index([5,1,3,4,2]),sg.index([5,1,4,3,2])].sort
 raise "Group generation didn't work." unless sg.gen_group([sg.index([2,1,3,4,5])]) == [sg.index([2,1,3,4,5]),sg.index([1,2,3,4,5])].sort
+raise "Cyclic group generation didn't work." unless sg.gen_cyclic_group(sg.index([2,3,1,4,5])) == [sg.index([1,2,3,4,5]),sg.index([2,3,1,4,5]),sg.index([3,1,2,4,5])].sort
 raise "method to_s_c on Symmetric_group didn't work." unless sg.to_s_c(i) == "[1,2,5][3,4]"
 raise "method to_s_c on Symmetric_group didn't work." unless sg.to_s_c([j,k]) == "[[1,2,5],[3,4]]"
 
