@@ -7,11 +7,6 @@
 
 #include "subgroup.h"
 
-void
-each_print_c (subset *set) {
-  printf ("%s\n",set_to_s_c (set));
-}
-
 int
 main (int argc, char **argv) {
   time_t t1, t2;
@@ -22,9 +17,9 @@ main (int argc, char **argv) {
   for (n=1; n<=5; ++n) {
     find_subgroups (n);
     printf ("Subgroups of the %d-degree symmetric group.\n", n);
-    printf ("The number of the subgroups is %d.\n", list_size ());
-    list_each (each_print_c);
-    list_free_full_all ();
+    printf ("The number of the subgroups is %d.\n", n_subgroups ());
+    print_subgroups ();
+    printf ("\n");
   }
   t2 = time (NULL);
   t = difftime (t2, t1);

@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include "permutation.h"
 #include "cayley.h"
+#include "list.h"
 #include "subset.h"
+
+static list start = {NULL, NULL};
 
 /* yes=>1, no->0, error^>-1 */
 int
@@ -14,7 +17,6 @@ set_is_subgroup (const subset *set) {
     return -1;
   set1 = set_mul_ss (set, set);
   stat = set_cmp (set, set1) == 0 ? 1 : 0;
-  free (set1);
   return stat;
 }
 
@@ -165,236 +167,35 @@ gen_cyclic_group (int degree, int i) {
   return set;
 }
 
-typedef struct _list list;
-struct _list {
-  list *next;
-  subset *set;
-};
-
-list list_start = {NULL, NULL};
-
-subset *
-list_lookup (const subset *set) {
-  list *l;
-
-  for (l=&list_start; l->next!=NULL; l=l->next)
-    if (l->next->set == set)
-      break;
-  if (l->next == NULL)
-    return NULL;
-  else
-    return l->next->set;
-}
-
-subset *
-list_append (subset *set) {
-  list *l;
-  subset *set1;
-
-  if ((set1 = list_lookup (set)) != NULL)
-    return set1;
-  for (l=&list_start; l->next != NULL; l=l->next)
-    ;
-  l->next = (list *) malloc (sizeof(list));
-  l->next->next = NULL;
-  l->next->set = set;
-  return l->next->set;
-}
-
-static void
-list_free_all0 (list *l) {
-  if (l == NULL || l->next == NULL)
-    return;
-  else {
-    list_free_all0 (l->next);
-    free (l->next);
-    l->next = NULL;
-  }
-}
-
-void
-list_free_all (void) {
-  list_free_all0 (&list_start);
-}
-
-/* following functions free all the lists and subgroups. */
-
-/* 以下の関数はリスト自身だけでなく、subgroupも解放することに注意 */
-static void
-list_free_full_all0 (list *l) {
-  if (l == NULL || l->next == NULL)
-    return;
-  else {
-    list_free_full_all0 (l->next);
-    set_free_set (l->next->set);
-    free (l->next);
-    l->next = NULL;
-  }
-}
-
-void
-list_free_full_all (void) {
-  list_free_full_all0 (&list_start);
-}
-
-int
-list_size (void) {
-  list *l;
-  int cnt = 0;
-
-  for (l=&list_start; l->next != NULL; l=l->next)
-    cnt++;
-  return cnt;
-}
-
-/* Create an array of elements of the list. */
-/* The old list is freed when it is successfully converted. */
-
-/* リストの要素からなる配列を返す。 */
-/* 変換後にリストのメモリは開放される。 */
-subset **
-list_2_array (void) {
-  list *l;
-  subset **p, **q;
-  int n;
-
-  n = list_size ();
-  if (n <= 0)
-    return NULL;
-  p = q = (subset **) malloc (sizeof(subset *)*n);
-  for (l=&list_start; --n >= 0 && l->next != NULL; l=l->next)
-    *p++ = l->next->set;
-  if (n < 0 && l->next != NULL) { /* error */
-    free (q);
-    return NULL;
-  }
-  list_free_all ();
-  return q;
-}
-
-static int
-list_array_cmp (subset **set1, subset **set2) {
-  return set_cmp(*set1, *set2);
-}
-
-static void
-array_qsort (subset **sarray, int n) {
-  qsort ((void *)sarray, n, sizeof(subset *), (int (*)(const void *, const void *)) list_array_cmp);
-}
-
-static void
-array_2_list (subset **sarray, int n) {
-  int i;
-
-  for (i=0; i<n; ++i)
-    list_append (sarray[i]);
-  free (sarray);
-}
-
-void
-list_sort (void) {
-  subset **sarray;
-  int n;
-
-  n = list_size ();
-  sarray = list_2_array ();
-  array_qsort (sarray, n);
-  array_2_list (sarray, n);  
-}
-
-void
-list_each (void (* func) (subset *)) {
-  list *l;
-
-  for (l=&list_start; l->next != NULL; l=l->next)
-    func (l->next->set);
-}
-
-static subset *
-lookup (list *start, const subset *set) {
-  list *l;
-
-  if (start == NULL)
-    return NULL;
-  for (l=start; l->next!=NULL; l=l->next)
-    if (l->next->set == set)
-      break;
-  if (l->next == NULL)
-    return NULL;
-  else
-    return l->next->set;
-}
-
-static subset *
-append (list *start, subset *set) {
-  list *l;
-  subset *set1;
-
-  if (start == NULL)
-    return NULL;
-  if ((set1 = lookup (start, set)) != NULL)
-    return set1;
-  for (l=start; l->next!=NULL; l=l->next)
-    ;
-  l->next = (list *) malloc (sizeof(list));
-  l->next->next = NULL;
-  l->next->set = set;
-  return l->next->set;
-}
-
-/* error => -1 */
-static int
-lsize (list *start) {
-  int i;
-  list *l;
-
-  if (start == NULL)
-    return -1;
-  for (i=0,l=start; l->next!=NULL; l=l->next)
-    ++i;
-  return i;
-}
-
-static void
-free_all (list *l) {
-  if (l == NULL || l->next == NULL)
-    return;
-  else {
-    free_all (l->next);
-    free (l->next);
-    l->next = NULL;
-  }
-}
-
 /* find intermediate groups between symgr and set. */
 
 /* symgrとsetの中間群を探す */
 static void
-find_intermediate_group (const int n, list *start) {
+find_intermediate_group (const int n, list *cgroups_0) {
   int i, j;
   subset *set1, *set2, *set3;
   list *l1, *l2, cgroups = {NULL, NULL};
 
-  if (lsize (start) == 1)
+  if (l_size (cgroups_0) == 1)
     return;
-  if (start == NULL || start->next == NULL)
+  if (cgroups_0 == NULL || cgroups_0->next == NULL)
     return;
-  for (l1=start; l1->next!=NULL; l1=l1->next)
+  for (l1=cgroups_0; l1->next!=NULL; l1=l1->next)
     for (l2=l1->next; l2->next!=NULL; l2=l2->next) {
-      if ((set1 = set_union (l1->next->set, l2->next->set)) == NULL) {
-        free_all (&cgroups);
+      if ((set1 = set_union (l1->next->o, l2->next->o)) == NULL) {
+        l_free_all (&cgroups);
         return;
       }
       if ((set2 = set_gen_group(set1)) == NULL) {
-        free_all (&cgroups);
+        l_free_all (&cgroups);
         return;
       }
-      append (&cgroups, set2);
+      l_append_s (&cgroups, set2);
     }
   for (l1=&cgroups; l1->next!=NULL; l1=l1->next)
-    list_append (l1->next->set);
+    l_append_s (&start, l1->next->o);
   find_intermediate_group (n, &cgroups);
-  free_all (&cgroups);
+  l_free_all (&cgroups);
 }
 
 /* Find all the subgroups of the n-degree symmetric group. */
@@ -410,22 +211,38 @@ find_subgroups (const int n) {
     return;
   if ((symgr = set_create_symgr (n)) == NULL)
     return;
-  list_append (symgr);
+  l_free_all (&start);
+  l_append_s (&start, symgr);
   a[0] = 0;
   if ((set1 = set_create_set (n, 1, a)) == NULL)
     return;
-  list_append (set1);
+  l_append_s (&start, set1);
   f = fact (n);
   for (i=1; i<f; ++i) {
     if ((set1 = gen_cyclic_group (n, i)) == NULL) {
-      free_all (&cgroups);
+      l_free_all (&cgroups);
       return;
     }
-    append (&cgroups, set1);
+    l_append_s (&cgroups, set1);
   }
   for (l=&cgroups; l->next!=NULL; l=l->next)
-    list_append (l->next->set);
+    l_append_s (&start, l->next->o);
   find_intermediate_group (n, &cgroups);
-  free_all (&cgroups);
+  l_free_all (&cgroups);
+}
+
+static void
+each_print_c (subset *set) {
+  printf ("%s\n",set_to_s_c (set));
+}
+
+int
+n_subgroups (void) {
+  return l_size (&start);
+}
+
+void
+print_subgroups (void) {
+  l_each (&start, (void (*) (void *)) each_print_c);
 }
 

@@ -1,3 +1,6 @@
+#ifndef __SUBSET_H__
+#define __SUBSET_H__
+
 typedef struct _subset subset;
 struct _subset {
   int degree;
@@ -5,8 +8,18 @@ struct _subset {
   int *a; /* array of permutations (indeces) */
 };
 
+#include "debug.h"
+#ifdef debug
+#include "list.h"
+list *
+set_start_address (void);
+#endif
+
 int
 is_set (const subset *set);
+
+void
+set_free_set0 (subset *set);
 
 void
 sub_finalize (void);
@@ -59,3 +72,4 @@ set_to_s (const subset *set);
 char *
 set_to_s_c (const subset *set);
 
+#endif /* __SUBSET_H__ */

@@ -6,19 +6,27 @@
 #include "cayley.h"
 #include "subset.h"
 
-typedef struct _subsetlist subsetlist;
-struct _subsetlist {
-  subsetlist *next;
-  subset *set;
-};
+#include "compile_option.h"
 
-subsetlist subsetlist_start[MAX_DEGREE];
+
+list start[MAX_DEGREE]; /* initialized with 0 */
+
+#include "debug.h"
+#ifdef debug
+list *
+set_start_address (void) {
+  return start;
+}
+#endif
 
 static int
 is_set0 (const int degree, const int n, const int set[]) {
   int i;
   int f;
 
+#ifdef no_check
+  return 1;
+#endif
   if (degree <= 0 || degree > MAX_DEGREE)
     return 0;
   f = fact(degree);
@@ -44,77 +52,14 @@ is_set (const subset *set) {
   return is_set0 (set->degree, set->n, set->a);
 }
 
-static subset *
-subsetlist_lookup (const subset *set) {
-  subsetlist *l;
-
+void
+set_free_set0 (subset *set) {
   if (is_set (set) == 0)
-    return NULL;
-  for (l=&(subsetlist_start[set->degree-1]); l->next != NULL; l=l->next)
-    if (l->next->set == set)
-      break;
-  if (l->next == NULL)
-    return NULL;
-  else
-    return l->next->set;
-}
-
-static subset *
-subsetlist_append (subset *set) {
-  subsetlist *l;
-  subset *set1;
-
-  if (is_set (set) == 0)
-    return NULL;
-  if ((set1 = subsetlist_lookup (set)) != NULL)
-    return set1;
-  for (l=&(subsetlist_start[set->degree-1]); l->next != NULL; l=l->next)
-    ;
-  l->next = (subsetlist *) malloc (sizeof(subsetlist));
-  l->next->next = NULL;
-  l->next->set = set;
-  return l->next->set;
-}
-
-static subset *
-subsetlist_remove (subset *set) {
-  subsetlist *l, *l1;
-
-  if (is_set (set) == 0)
-    return NULL;
-  for (l=&(subsetlist_start[set->degree-1]); l->next != NULL; l=l->next)
-    if (l->next->set == set)
-      break;
-  if (l->next == NULL) /* not found */
-    return NULL;
-  l1 = l->next;
-  l->next = l1->next;
-  free (l1);
-  return set;
-}
-
-static void
-subsetlist_free_full_all0 (subsetlist *l) {
-  if (l == NULL || l->next == NULL)
     return;
-  else {
-    subsetlist_free_full_all0 (l->next);
-    if (l->next->set->a != NULL)
-      free (l->next->set->a);
-    free (l->next->set);
-    free (l->next);
-    l->next = NULL;
-  }
+  if (set->a != NULL)
+    free (set->a);
+  free (set);
 }
-
-static void
-subsetlist_free_full_all (void) {
-  int i;
-
-  for (i=0; i<MAX_DEGREE; ++i)
-    subsetlist_free_full_all0 (&(subsetlist_start[i]));
-}
-
 /* Free all the subsets and lists. */
 /* Users call this function at the end of the program. */
 
@@ -122,7 +67,10 @@ subsetlist_free_full_all (void) {
 /* プログラムの最後で呼び出す。 */
 void
 sub_finalize (void) {
-  subsetlist_free_full_all ();
+  int i;
+
+  for (i=0; i<MAX_DEGREE; ++i)
+    l_free_full_all (&start[i], (void (*) (void *)) set_free_set0);
 }
 
 /* degree: the degree of the symmetric group contains the subsets */
@@ -134,27 +82,11 @@ sub_finalize (void) {
 /* a[]: 部分集合の要素の配列 */
 subset *
 set_create_set (const int degree, const int n, const int a[]) {
-  subset *set;
+  subset *set, *set1;
   int i, stat;
-  subsetlist *l;
-
+  list *l;
   if (is_set0 (degree, n, a) == 0)
     return NULL;
-  for (l=&(subsetlist_start[degree-1]); l->next != NULL; l=l->next) {
-    if (l->next->set->degree != degree || l->next->set->n != n)
-      continue;
-    stat = 1;
-    for (i=0; i<n; ++i)
-      if (l->next->set->a[i] != a[i]) {
-        stat = 0;
-        break;
-      }
-    if (stat == 1)
-      break;
-  }
-  if (l->next != NULL)
-    return l->next->set;
-  /* create new one */
   set = (subset *) malloc(sizeof(subset));
   set->degree = degree;
   set->n = n;
@@ -165,12 +97,17 @@ set_create_set (const int degree, const int n, const int a[]) {
     for (i=0; i<n; ++i)
       *(set->a + i) = a[i];
   }
-  if (subsetlist_append (set) == NULL) {
+  if ((set1 = l_lookup_with_cmp (&(start[degree-1]), set, (int (*) (const void *, const void *)) set_cmp)) != NULL) {
+    free (set->a);
+    free (set);
+    return set1;
+  } else if ((set1 = l_append_s (&(start[degree-1]), set)) == NULL) {
     free (set->a);
     free (set);
     return NULL;
-  } else
+  } else {
     return set;
+  }
 }
 
 /* Usually, users don't need to use this function. */
@@ -180,8 +117,7 @@ void
 set_free_set (subset *set) {
   if (is_set (set) == 0)
     return;
-  if (subsetlist_lookup (set) != NULL)
-    subsetlist_remove (set);
+  l_remove (&start[set->degree-1], set);
   if (set->a != NULL)
     free (set->a);
   free (set);
@@ -382,35 +318,14 @@ set_subtract (const subset *set1, const subset *set2) {
   return set;
 }
 
+static int
+num_cmp (int *a, int *b) {
+  return *a-*b;
+}
+
 static void
 q_sort (int a[], const int l, const int h) {
-  int swap, l1, h1, s, mid;
-int i;
-  if (l >= h)
-    return;
-  mid = (l + h) / 2;
-  s = a[mid];
-  swap = a[h];
-  a[h] = a[mid];
-  a[mid] = swap;
-  l1 = l;
-  h1 = h-1;
-  while (l1 <= h1) {
-    for (;a[l1] < s && l1 <= h-1; ++l1)
-      ;
-    for (;a[h1] >= s && h1 >= l;--h1)
-      ;
-    if (l1 < h1) {
-      swap = a[l1];
-      a[l1++] = a[h1];
-      a[h1--] = swap;
-    }
-  }
-  swap = a[h];
-  a[h] = a[l1];
-  a[l1++] = swap;
-  q_sort (a, l, h1);
-  q_sort (a, l1, h);
+  qsort (a+l, h-l+1, sizeof(int), (int (*) (const void *, const void *)) num_cmp);
 }
 
 /* return the size of the subset*/

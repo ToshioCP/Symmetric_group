@@ -29,6 +29,11 @@ each_test_1 (subset *set) {
   ++i;
 }
 
+int
+set_cmp_p (subset **a, subset **b) {
+  return set_cmp (*a, *b);
+}
+
 void
 test() {
 printf ("set_is_subgroup\n");
@@ -196,7 +201,7 @@ printf ("gen_cyclic_group\n");
     printf ("gen_cyclic_group didn't work. 8\n");
 
 /* list */
-printf ("list_append & list_lookup\n");
+printf ("l_append & l_lookup in subgroup.c\n");
   int sa[3][3] = {
     {1,3,5},
     {1,2,4},
@@ -205,132 +210,122 @@ printf ("list_append & list_lookup\n");
   subset *ss[3], *p;
   for (i=0; i<3; ++i)
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_append 1-%d)\n", i);
-  if (list_append (ss[0]) != ss[0])
-    printf ("list_append didn't work. (1)\n");
-  else if (list_lookup (ss[0]) != ss[0])
-    printf ("list_lookup didn't work. (1)\n");
-  if (list_lookup (ss[1]) != NULL)
-    printf ("list_lookup didn't work. (2)\n");
-  list_free_full_all ();
-printf ("list_append\n");
+      printf ("set_create_set didn't work. (l_append 1-%d)\n", i);
+  if (l_append (&start, ss[0]) != ss[0])
+    printf ("l_append didn't work. (1)\n");
+  else if (l_lookup (&start, ss[0]) != ss[0])
+    printf ("l_lookup didn't work. (1)\n");
+  if (l_lookup (&start, ss[1]) != NULL)
+    printf ("l_lookup didn't work. (2)\n");
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
+printf ("l_append_s\n");
   if ((ss[0] = set_create_set (4,3,sa[0])) == NULL)
-    printf ("set_create_set didn't work. (list_append 1)\n");
-  if (list_append (ss[0]) != ss[0])
-    printf ("list_append didn't work. (1)\n");
+    printf ("set_create_set didn't work. (l_append_s 1)\n");
+  if (l_append_s (&start, ss[0]) != ss[0])
+    printf ("l_append didn't work. (1)\n");
   if ((ss[1] = set_create_set (4,3,sa[0])) == NULL)
-    printf ("set_create_set didn't work. (list_append 2)\n");
-  if (list_append (ss[0]) != ss[0])
-    printf ("list_append didn't work. (2)\n");
-  if (list_size () != 1)
-    printf ("list_append didn't work. (3)\n");
+    printf ("set_create_set didn't work. (l_append_s 2)\n");
+  if (l_append_s (&start, ss[0]) != ss[0])
+    printf ("l_append didn't work. (3)\n");
+  if (l_size (&start) != 1)
+    printf ("l_append didn't work. (4)\n");
   if ((ss[3] = set_create_set (4,3,sa[2])) == NULL)
-    printf ("set_create_set didn't work. (list_append 3)\n");
-  if (list_append (ss[3]) != ss[3])
-    printf ("list_append didn't work. (4)\n");
-  if (list_size () != 2)
-    printf ("list_append didn't work. (5)\n");
-  list_free_full_all ();
-printf ("list_size\n");
+    printf ("set_create_set didn't work. (l_append 3)\n");
+  if (l_append (&start, ss[3]) != ss[3])
+    printf ("l_append didn't work. (4)\n");
+  if (l_size (&start) != 2)
+    printf ("l_append didn't work. (5)\n");
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
+printf ("l_size\n");
   for (i=0; i<3; ++i)
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_size - %d)\n", i);
-  if (list_append (ss[0]) != ss[0])
-    printf ("list_append didn't work. (list_size)\n");
-  if (list_size () != 1)
-    printf ("list_size didn't work. (1)\n");
-  if (list_append (ss[1]) != ss[1])
-    printf ("list_append didn't work. (2)\n");
-  if (list_size () != 2)
-    printf ("list_size didn't work. (2)\n");
-  if (list_append (ss[2]) != ss[2])
-    printf ("list_append didn't work. (3)\n");
-  if (list_size () != 3)
-    printf ("list_size didn't work. (3)\n");
-printf ("list_free_full_all\n");
-  list_free_full_all ();
-  if (list_size () != 0)
-    printf ("list_size didn't work. (0)\n");
-printf ("list_free_all\n");
+      printf ("set_create_set didn't work. (l_size - %d)\n", i);
+  if (l_append (&start, ss[0]) != ss[0])
+    printf ("l_append didn't work. (l_size)\n");
+  if (l_size (&start) != 1)
+    printf ("l_size didn't work. (1)\n");
+  if (l_append (&start, ss[1]) != ss[1])
+    printf ("l_append didn't work. (2)\n");
+  if (l_size (&start) != 2)
+    printf ("l_size didn't work. (2)\n");
+  if (l_append (&start, ss[2]) != ss[2])
+    printf ("l_append didn't work. (3)\n");
+  if (l_size (&start) != 3)
+    printf ("l_size didn't work. (3)\n");
+printf ("l_free_full_all\n");
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
+  if (l_size (&start) != 0)
+    printf ("l_free_full_all didn't work. (0)\n");
+  if (start.next != NULL)
+    printf ("l_free_full_all didn't work. (1)\n");
+printf ("l_free_all\n");
   for (i=0; i<3; ++i)
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_free_all - %d)\n", i);
-  if (list_append (ss[0]) != ss[0])
-    printf ("list_append didn't work. (list_free_all 1)\n");
-  if (list_append (ss[1]) != ss[1])
-    printf ("list_append didn't work. (list_free_all 2)\n");
-  if (list_append (ss[2]) != ss[2])
-    printf ("list_append didn't work. (list_free_all 3)\n");
-  list_free_all ();
-  if (list_size () != 0)
-    printf ("list_size didn't work. (list_free_all 1)\n");
+      printf ("set_create_set didn't work. (l_free_all - %d)\n", i);
+  if (l_append (&start, ss[0]) != ss[0])
+    printf ("l_append didn't work. (l_free_all 1)\n");
+  if (l_append (&start, ss[1]) != ss[1])
+    printf ("l_append didn't work. (l_free_all 2)\n");
+  if (l_append (&start, ss[2]) != ss[2])
+    printf ("l_append didn't work. (l_free_all 3)\n");
+  l_free_all (&start);
+  if (l_size (&start) != 0)
+    printf ("l_size didn't work. (l_free_all 1)\n");
+  if (start.next != NULL)
+    printf ("l_free_all didn't work. (start not NULL)\n");
   for (i=0; i<3; ++i)
     set_free_set (ss[i]);
-printf ("list_2_array\n");
+printf ("l_l2a\n");
   subset **sarray;
   for (i=0; i<3; ++i) {
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_2_array 1-%d)\n", i);
-    if (list_append (ss[i]) != ss[i])
-      printf ("list_append didn't work. (list_2_array 1-%d)\n", i);
+      printf ("set_create_set didn't work. (l_l2a 1-%d)\n", i);
+    if (l_append (&start, ss[i]) != ss[i])
+      printf ("l_append didn't work. (l_l2a 1-%d)\n", i);
   }
-  if ((sarray = list_2_array ()) == NULL)
-    printf ("list_2_array didn't work. (1)\n");
+  if ((sarray = (subset **) l_l2a (&start)) == NULL)
+    printf ("l_l2a didn't work. (1)\n");
   for (i=0; i<3; ++i)
     if (set_cmp (*(sarray+i), ss[i]) != 0)
-      printf ("list_2_array didn't work. (2)\n");
-  if (list_size () != 0)
-    printf ("list_size didn't work. (list_2_array 1)\n");
-printf ("array_qsort\n");
-  array_qsort (sarray, 3);
-  if (set_cmp (*sarray, ss[1]) != 0)
-    printf ("array_qsort didn't work. (1)\n");
-  if (set_cmp (*(sarray+1), ss[0]) != 0)
-    printf ("array_qsort didn't work. (2)\n");
-  if (set_cmp (*(sarray+2), ss[2]) != 0)
-    printf ("array_qsort didn't work. (3)\n");
-printf ("array_2_list\n");
-  array_2_list (sarray, 3);
-  for (i=0; i<3; ++i)
-    if (list_lookup (ss[i]) != ss[i])
-      printf ("array_2_list didn't work. (%d)\n", i);
-  list_free_full_all ();
-printf ("list_sort\n");
+      printf ("l_l2a didn't work. (2)\n");
+  if (l_size (&start) != 0)
+    printf ("l_size didn't work. (l_l2a 1)\n");
+  free (sarray);
+printf ("l_sort\n");
   for (i=0; i<3; ++i) {
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_sort - %d)\n", i);
-    if (list_append (ss[i]) != ss[i])
-      printf ("list_append didn't work. (list_sort - %d)\n", i);
+      printf ("set_create_set didn't work. (l_sort - %d)\n", i);
+    if (l_append (&start, ss[i]) != ss[i])
+      printf ("l_append didn't work. (l_sort - %d)\n", i);
   }
-  list_sort ();
-  if ((sarray = list_2_array ()) == NULL)
-    printf ("list_sort didn't work. (list_2_array 1)\n");
+  l_sort (&start, (int (*) (const void *, const void *)) set_cmp_p);
+  if ((sarray = (subset **) l_l2a (&start)) == NULL)
+    printf ("l_sort didn't work. (l_l2a 1)\n");
   if (set_cmp (*sarray, ss[1]) != 0)
-    printf ("list_sort didn't work. (1)\n");
+    printf ("l_sort didn't work. (1)\n");
   if (set_cmp (*(sarray+1), ss[0]) != 0)
-    printf ("list_sort didn't work. (2)\n");
+    printf ("l_sort didn't work. (2)\n");
   if (set_cmp (*(sarray+2), ss[2]) != 0)
-    printf ("list_sort didn't work. (3)\n");
-  array_2_list (sarray, 3);
-  list_free_full_all ();
-printf ("list_each\n");
+    printf ("l_sort didn't work. (3)\n");
+  free (sarray);
+printf ("l_each\n");
   for (i=0; i<3; ++i) {
     if ((ss[i] = set_create_set (4,3,sa[i])) == NULL)
-      printf ("set_create_set didn't work. (list_each - %d)\n", i);
-    if (list_append (ss[i]) != ss[i])
-      printf ("list_append didn't work. (list_each - %d)\n", i);
+      printf ("set_create_set didn't work. (l_each - %d)\n", i);
+    if (l_append (&start, ss[i]) != ss[i])
+      printf ("l_append didn't work. (l_each - %d)\n", i);
   }
-  list_each (each_test_1); /* See the output. */
-  list_free_full_all ();
+  l_each (&start, (void (*) (void *)) each_test_1);
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
 printf ("find_subgroups & find_intermediate_group\n");
   int sg1[1] = {0};
   set1 = set_create_set (1,1,sg1);
   find_subgroups (1);
-  if (list_size () != 1)
+  if (l_size (&start) != 1)
     printf ("find_subgroup didn't work. (degree=1)\n");
-  if (list_lookup (set1) != set1)
+  if (l_lookup (&start, set1) != set1)
     printf ("find_subgroup didn't work. (degree=1)\n");
-  list_free_full_all ();
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
   int sg2[2][2] = {
     {0},
     {0,1}
@@ -338,13 +333,13 @@ printf ("find_subgroups & find_intermediate_group\n");
   set1 = set_create_set (2,1,sg2[0]);
   set2 = set_create_set (2,2,sg2[1]);
   find_subgroups (2);
-  if (list_size () != 2)
+  if (l_size (&start) != 2)
     printf ("find_subgroup didn't work. (degree=2) 1\n");
-  if (list_lookup (set1) != set1)
+  if (l_lookup (&start, set1) != set1)
     printf ("find_subgroup didn't work. (degree=2) 2\n");
-  if (list_lookup (set2) != set2)
+  if (l_lookup (&start, set2) != set2)
     printf ("find_subgroup didn't work. (degree=2) 3\n");
-  list_free_full_all ();
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
   int sg3[6][6] = {
     {0},
     {0,1},
@@ -355,14 +350,14 @@ printf ("find_subgroups & find_intermediate_group\n");
   };
   int sg3_size[6] = {1,2,3,4,5,6};
   find_subgroups (3);
-  if (list_size () != 6)
+  if (l_size (&start) != 6)
     printf ("find_subgroup didn't work. (degree=3) 1\n");
   for (i=0; i<6; ++i) {
     set1 = set_create_set (3, sg3_size[i], sg3[i]);
-    if (list_lookup (set1) != set1)
+    if (l_lookup (&start, set1) != set1)
       printf ("find_subgroup didn't work. (degree=3) %d\n", i+2);
   }
-  list_free_full_all ();
+  l_free_full_all (&start, (void (*) (void *)) set_free_set);
   int sg4[30][24] = {
     {0},
     {0,1},
@@ -397,14 +392,14 @@ printf ("find_subgroups & find_intermediate_group\n");
   };
   int sg4_size[30] = {1,2,2,2,2,2,2,2,2,2,3,3,3,3,4,4,4,4,4,4,4,6,6,6,6,8,8,8,12,24};
   find_subgroups (4);
-  if (list_size () != 30)
+  if (l_size (&start) != 30)
     printf ("find_subgroup didn't work. (degree=4) 1\n");
   for (i=0; i<30; ++i) {
     set1 = set_create_set (4, sg4_size[i], sg4[i]);
-    if (list_lookup (set1) != set1)
+    if (l_lookup (&start, set1) != set1)
       printf ("find_subgroup didn't work. (degree=4) %d\n", i+2);
   }
-  list_free_full_all ();
+  l_free_full_all (&start, (void (*) (void *)) set_free_set0);
 }
 
 int

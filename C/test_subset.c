@@ -41,7 +41,7 @@ printf ("is_set0\n");
   for (i=0; i<6;++i)
     if (is_set0 (i, size[i], b[i]) != 0)
       printf ("is_set0 didn't work(2).\n");
-printf ("subsetlist_append & subsetlist_lookup\n");
+printf ("l_append & l_lookup in subset.c\n");
   /* create a set by hand */
   subset *set = (subset *) malloc (sizeof(subset));
   int *ar = (int *) malloc (sizeof(int)*3);
@@ -50,22 +50,22 @@ printf ("subsetlist_append & subsetlist_lookup\n");
   set->degree = 3;
   set->n = 3;
   set->a = ar;
-  if (subsetlist_append (set) != set)
-    printf ("subsetlist_append didn't work.\n");
-  if (subsetlist_lookup (set) != set)
-    printf ("subsetlist_lookup didn't work.\n");
-printf ("subsetlist_remove\n");
-  if (subsetlist_remove (set) != set)
-    printf ("subsetlist_remove didn't work. 1\n");
-  if (subsetlist_lookup (set) != NULL)
-    printf ("subsetlist_remove didn't work. 2\n");
-printf ("subsetlist_free_full_all\n");
-  if (subsetlist_append (set) != set)
-    printf ("subsetlist_append didn't work. (subsetlist_free_full_all)\n");
-  subsetlist_free_full_all ();
-  if (subsetlist_start[2].next != NULL)
-    printf ("subsetlist_free_full_all didn't work.\n");
-  subsetlist_start[2].next = NULL;
+  if (l_append (&start[set->degree-1], set) != set)
+    printf ("l_append didn't work.\n");
+  if (l_lookup (&start[set->degree-1], set) != set)
+    printf ("l_lookup didn't work.\n");
+printf ("l_remove in subset.c\n");
+  if (l_remove (&start[set->degree-1], set) != set)
+    printf ("l_remove didn't work. 1\n");
+  if (l_lookup (&start[set->degree-1], set) != NULL)
+    printf ("l_remove didn't work. 2\n");
+printf ("l_free_full_all\n");
+  if (l_append (&start[set->degree-1], set) != set)
+    printf ("l_append didn't work. (l_free_full_all)\n");
+  l_free_full_all (&start[set->degree-1], (void (*) (void *)) set_free_set0);
+  if (start[2].next != NULL)
+    printf ("l_free_full_all didn't work.\n");
+  start[2].next = NULL;
 printf ("set_create_set\n");
   subset *set0;
   set = set_create_set (5, 5, a[4]);
@@ -300,7 +300,7 @@ printf ("set_to_s_c\n");
     printf ("set_to_s_c didn't work. (n=5)\n");
   if (s != NULL)
     free (s);
-  subsetlist_free_full_all ();
+  sub_finalize ();
 }
 
 int

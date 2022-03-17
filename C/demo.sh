@@ -1,2 +1,2 @@
-gcc demo.c subgroup.c subset.c cayley.c permutation.c
+gcc demo.c subgroup.c subset.c list.c cayley.c permutation.c
 

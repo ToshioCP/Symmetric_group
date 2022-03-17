@@ -20,9 +20,9 @@ main (int argc, char **argv) {
   t1 = time (NULL);
     find_subgroups (6);
     printf ("Subgroups of the 6-degree symmetric group.\n");
-    printf ("The number of the subgroups is %d.\n", list_size ());
-    list_each (each_print_c);
-    list_free_full_all ();
+    printf ("The number of the subgroups is %d.\n", n_subgroups ());
+    print_subgroups ();
+    printf ("\n");
   t2 = time (NULL);
   t = difftime (t2, t1);
   printf ("%f\n", t);
