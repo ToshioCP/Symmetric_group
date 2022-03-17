@@ -4,29 +4,22 @@
 
 #include "permutation.h"
 #include "cayley.h"
+#include "list.h"
 #include "subset.h"
 
 #include "compile_option.h"
 
+extern int no_check;
 
-list start[MAX_DEGREE]; /* initialized with 0 */
-
-#include "debug.h"
-#ifdef debug
-list *
-set_start_address (void) {
-  return start;
-}
-#endif
+static list start[MAX_DEGREE]; /* initialized with 0 */
 
 static int
 is_set0 (const int degree, const int n, const int set[]) {
   int i;
   int f;
 
-#ifdef no_check
-  return 1;
-#endif
+  if (no_check) return 1;
+
   if (degree <= 0 || degree > MAX_DEGREE)
     return 0;
   f = fact(degree);
@@ -66,7 +59,7 @@ set_free_set0 (subset *set) {
 /* subsetのメモリをすべて解放し、リストのメモリも解放する。 */
 /* プログラムの最後で呼び出す。 */
 void
-sub_finalize (void) {
+set_finalize (void) {
   int i;
 
   for (i=0; i<MAX_DEGREE; ++i)

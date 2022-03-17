@@ -86,6 +86,14 @@ printf ("set_create_set\n");
     printf ("set_create_set didn't work(6).\n");
     set_free_set (set);
   }
+printf ("set_finalize\n");
+  for (i=0; i<6; ++i)
+    if (set_create_set (6, size[i], a[i]) == NULL)
+      printf ("set_create_set didn't work. (set_finalize %d)\n", i);
+  set_finalize ();
+  for (i=0; i<6; ++i)
+    if (start[i].next != NULL)
+      printf ("set_finalize didn't work. %d\n", i);
 printf ("is_set\n");
   set = set_create_set (3, 3, a[2]);
   if (is_set (set) != 1)
@@ -300,7 +308,7 @@ printf ("set_to_s_c\n");
     printf ("set_to_s_c didn't work. (n=5)\n");
   if (s != NULL)
     free (s);
-  sub_finalize ();
+  set_finalize ();
 }
 
 int

@@ -7,11 +7,15 @@
 
 #include "subgroup.h"
 
+extern int no_check;
+
 int
 main (int argc, char **argv) {
   time_t t1, t2;
   double t;
   int n;
+
+  no_check = 1;
 
   t1 = time (NULL);
   for (n=1; n<=5; ++n) {

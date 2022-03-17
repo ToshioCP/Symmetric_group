@@ -8,13 +8,6 @@ struct _subset {
   int *a; /* array of permutations (indeces) */
 };
 
-#include "debug.h"
-#ifdef debug
-#include "list.h"
-list *
-set_start_address (void);
-#endif
-
 int
 is_set (const subset *set);
 
@@ -22,7 +15,7 @@ void
 set_free_set0 (subset *set);
 
 void
-sub_finalize (void);
+set_finalize (void);
 
 subset *
 set_create_set (const int degree, const int n, const int a[]);

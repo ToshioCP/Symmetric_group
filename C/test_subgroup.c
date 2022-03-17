@@ -10,11 +10,6 @@ each_print (subset *set) {
 }
 
 void
-each_print_c (subset *set) {
-  printf ("%s\n",set_to_s_c (set));
-}
-
-void
 each_test_1 (subset *set) {
   static int i;
   int sa[3][3] = {

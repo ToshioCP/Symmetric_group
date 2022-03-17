@@ -1,8 +1,5 @@
-/* test subgroup.c */
-
 #include <stdio.h>
 #include "list.c"
-#include "debug.h"
 
 void
 each_test_1 (subset *set) {
@@ -119,10 +116,6 @@ printf ("l_free_full_all\n");
   l_free_full_all (&start, (void (*) (void *)) set_free_set);
   if (start.next != NULL)
     printf ("l_free_full_all didn't work. 1\n");
-  subset_start = set_start_address ();
-  for (i=0; i<6; ++i)
-    if ((subset_start+i)->next != NULL)
-      printf ("l_free_full_all didn't work. 2-%d\n", i);
 printf ("l_l2a\n");
   for (i=0; i<6; ++i)
     if ((ss[i] = set_create_set (i+1,b[i],a[i])) == NULL)

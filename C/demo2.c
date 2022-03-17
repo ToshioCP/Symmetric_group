@@ -6,6 +6,8 @@
 
 #include "subgroup.h"
 
+extern int no_check;
+
 void
 each_print_c (subset *set) {
   printf ("%s\n",set_to_s_c (set));
@@ -16,6 +18,8 @@ main (int argc, char **argv) {
   time_t t1, t2;
   double t;
   int n;
+
+  no_check = 1;
 
   t1 = time (NULL);
     find_subgroups (6);
