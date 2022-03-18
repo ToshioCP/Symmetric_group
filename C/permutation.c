@@ -110,7 +110,7 @@ mul (const int size, const int p[], const int q[]) {
 
 /* 置換を文字列にして返す。 */
 /* 例えば、p[]={1,2,3}のとき、文字列"[1,2,3]"が返される。 */
-/* 文字列は不要になったら、そのメモリを開放すること。 */
+/* 文字列は不要になったら、そのメモリを解放すること。 */
 #include <stdio.h>
 char *
 to_s (const int size, const int p[]) {

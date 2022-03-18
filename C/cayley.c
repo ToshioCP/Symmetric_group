@@ -56,8 +56,8 @@ cayley_table (const int n, int *p) {
   int i, j, k, l, found, *pi, *pj, *r;
  
   f = fact(n);
-  t = (int *) malloc(sizeof(int)*f*f);
   r = (int *) malloc(sizeof(int)*n);
+  t = (int *) malloc(sizeof(int)*f*f);
   for (i=0; i<f; ++i)
     for (j=0; j<f; ++j) {
       pi = p + i*n;

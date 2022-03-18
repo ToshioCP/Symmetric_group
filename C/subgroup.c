@@ -25,14 +25,13 @@ set_is_subgroup (const subset *set) {
 /* 対称群の生成。 */
 subset *
 set_create_symgr (int degree) {
-  int i, f, *a;
+  int i, f, a[MAX_FACT_DEGREE];
 
   if (degree <= 0 || degree > MAX_DEGREE)
     return NULL;
   f = fact (degree);
-  a = (int *) malloc (sizeof(int)*f);
   for (i=0; i<f; ++i)
-    *(a+i) =i;
+    a[i] =i;
   return set_create_set (degree, f, a);
 }
 
@@ -45,8 +44,8 @@ set_create_symgr (int degree) {
 /* もしそれが要素であったら、エラーが返される。 */
 subset *
 set_append (const subset *set, const int i) {
-  int degree, size, *array, f, k, n, *a, *b;
-  subset *set1;
+  int degree, size, *array, f, k, n;
+  int p[MAX_FACT_DEGREE], *q;
 
   if (is_set (set) == 0)
     return NULL;
@@ -61,29 +60,27 @@ set_append (const subset *set, const int i) {
       if (*(array+k) == i)
         return NULL;
   n = size + 1;
-  a = b = (int *) malloc (sizeof(int)*n);
+  q = p;
   if (n == 1) /* set is empty */
-    *a = i;
+    *q = i;
   else {
     if (i < *array)
-      *a++ = i;
+      *q++ = i;
     for (k=0; k<size; ++k) {
       if (k > 0 && *(array+k-1) < i && i < *(array+k))
-        *a++ = i;
-      *a++ = *(array+k);
+        *q++ = i;
+      *q++ = *(array+k);
     }
     if (*(array+size-1) < i)
-      *a++ = i;
+      *q++ = i;
   }
-  set1 = set_create_set (degree, n, b);
-  free (b);
-  return set1;
+  return set_create_set (degree, n, p);
 }
 
 subset *
 set_remove (subset *set, const int i) {
-  int degree, size, *array, f, k, l, n, *p;
-  subset *set1;
+  int degree, size, *array, f, k, l, n;
+  int p[MAX_FACT_DEGREE];
 
   if (is_set (set) == 0)
     return NULL;
@@ -98,19 +95,14 @@ set_remove (subset *set, const int i) {
   n = size - 1;
   if (n == 0)
     return set_create_set (degree, 0, NULL);
-  p = (int *) malloc (sizeof(int)*n);
   for (k=l=0; k<size && l<n; ++k)
     if (*(array+k) != i) {
-      *(p+l) = *(array+k);
+      p[l] = *(array+k);
       ++l;
     }
-  if (l != n) {
-    free (p);
+  if (l != n)
     return NULL;
-  }
-  set1 = set_create_set (degree, n, p);
-  free (p);
-  return set1;
+  return set_create_set (degree, n, p);
 }
 
 /* Return the pointer of the group generated from the set. */
@@ -145,26 +137,21 @@ int_array_cmp (int *a, int *b) {
 
 subset *
 gen_cyclic_group (int degree, int i) {
-  int j, k, f, *a;
-  subset *set;
+  int j, k, f;
+  int p[MAX_FACT_DEGREE];
 
   if (degree < 1 || degree > MAX_DEGREE)
     return NULL;
   if (i < 0 || i >= fact (degree))
     return NULL;
   f = fact(degree); /* f can be smaller, but I couldn't find it. */
-  a = (int *) malloc (sizeof(int)*f);
-  *a = 0;
+  p[0] = 0;
   for (j=i,k=1; j!=0 && k<f; j=mul_pp(degree, j, i), ++k)
-    *(a+k) = j;
-  if (j != 0) {
-    free (a);
+    p[k] = j;
+  if (j != 0)
     return NULL;
-  }
-  qsort ((void *)a, k, sizeof(int), (int (*)(const void *, const void *)) int_array_cmp);
-  set = set_create_set (degree, k, a);
-  free (a);
-  return set;
+  qsort ((void *)p, k, sizeof(int), (int (*)(const void *, const void *)) int_array_cmp);
+  return set_create_set (degree, k, p);
 }
 
 /* find intermediate groups between symgr and set. */
@@ -176,6 +163,7 @@ find_intermediate_group (const int n, list *cgroups_0) {
   subset *set1, *set2, *set3;
   list *l1, *l2, cgroups = {NULL, NULL};
 
+/*printf ("%d\n", l_size(cgroups_0));*/
   if (l_size (cgroups_0) == 1)
     return;
   if (cgroups_0 == NULL || cgroups_0->next == NULL)

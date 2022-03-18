@@ -1,4 +1,5 @@
 #define MAX_DEGREE 6
+#define MAX_FACT_DEGREE 720
 
 int
 fact (const int n);
