@@ -7,44 +7,8 @@
 
 void
 test () {
-
-printf ("gen_sym_group1\n");
-  int *p, i, j, n;
-  for (n=1; n<=MAX_DEGREE; ++n) {
-    p = gen_sym_group_1 (n);
-    for (i=0; i<fact(n); ++i)
-      for (j=0; j<n; ++j)
-        switch (n) {
-        case 1:
-          if (*(p+i*n+j) != s1[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=1)\n");
-          break;
-        case 2:
-          if (*(p+i*n+j) != s2[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=2)\n");
-          break;
-        case 3:
-          if (*(p+i*n+j) != s3[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=3)\n");
-          break;
-        case 4:
-          if (*(p+i*n+j) != s4[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=4)\n");
-          break;
-        case 5:
-          if (*(p+i*n+j) != s5[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=5)\n");
-          break;
-        case 6:
-          if (*(p+i*n+j) != s6[i][j])
-            printf ("gen_sym_group_1 didn't work. (n=6)\n");
-          break;
-        default:
-          break;
-        }
-    free (p);
-  }
 printf ("cayley_table & create_ctable\n");
+  int n, i, j;
   int *t;
   for (n=1; n<=MAX_DEGREE; ++n) {
     if ((t = create_ctable (n)) == NULL)
@@ -99,4 +63,3 @@ int
 main (int argvc, char **argv) {
   test();
 }
-

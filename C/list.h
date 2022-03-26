@@ -19,10 +19,10 @@ start => set1 => NULL
 */
 
 void *
-l_lookup (list *start, const void *o);
+l_lookup (const list *start, const void *o);
 
 void *
-l_lookup_with_cmp (list *start, const void *o, int (*cmp) (const void *, const void *));
+l_lookup_with_cmp (const list *start, const void *o, int (*cmp) (const void *, const void *));
 
 void *
 l_append (list *start, void *o);
@@ -30,6 +30,9 @@ l_append (list *start, void *o);
 /* Append but only if the o doesn't exist in the list. */
 void *
 l_append_s (list *start, void *o);
+
+void *
+l_prepend (list *start, void *o);
 
 void *
 l_remove (list *start, void *o);
@@ -48,7 +51,7 @@ l_free_full_all (list *l, void (*free_o) (void *));
 /* l_size (&start); */
 /* error => -1 */
 int
-l_size (list *l);
+l_size (const list *l);
 
 /* Create an array of elements of the list. */
 /* The old list is freed when it is successfully converted. */
@@ -62,6 +65,6 @@ void
 l_sort (list *l, int (*l_cmp)(const void *, const void *));
 
 void
-l_each (list *l, void (* func) (void *));
+l_each (const list *l, void (* func) (void *));
 
 #endif /* __LIST_H__ */

@@ -6,78 +6,20 @@
 
 int * cayley_tables[MAX_DEGREE];
 
-/* a: n-sized array of int. */
-/* *p: an array of int. */
-
-/* a: 大きさが n の整数の配列 */
-/* *p: 整数の配列 */
-static void
-gen_sym_group_0 (const int n, int j, int a[], int **p) {
-  int i, swap;
-
-  if (j == n-1)
-    for (i=0; i<n; ++i)
-      *(*p)++ = a[i];
-  else {
-    for (i=j; i<n; ++i) {
-      swap = a[j];
-      a[j] = a[i];
-      a[i] = swap;
-      gen_sym_group_0 (n, j+1, a, p);
-    }
-    for (i=j; i<n-1; ++i) {
-      swap = a[i];
-      a[i] = a[i+1];
-      a[i+1] = swap;
-    }
-  }
-}
-
-/* Returns an array that contains the whole sorted permutations. */
-/* The array will have to be freed by the caller when it becomes useless. */
-
-/* n次の置換全体を昇順に並べた配列を返す。 */
-/* 配列は呼び出し側でメモリ解放する。 */
-static int *
-gen_sym_group_1 (const int n) {
-  int i, *p, *q;
-  int a[MAX_DEGREE];
-
-  for (i=0; i<MAX_DEGREE; ++i)
-    a[i] = i + 1;
-  p = q = (int *) malloc(sizeof(int)*n*fact(n));
-  gen_sym_group_0 (n, 0, a, &p);
-  return q;
-}
-
 static int*
-cayley_table (const int n, int *p) {
+cayley_table (const int n) {
   int f, *t;
-  int i, j, k, l, found, *pi, *pj, *r;
- 
+  int i, j, p[MAX_DEGREE], q[MAX_DEGREE], r[MAX_DEGREE];
+
   f = fact(n);
-  r = (int *) malloc(sizeof(int)*n);
   t = (int *) malloc(sizeof(int)*f*f);
   for (i=0; i<f; ++i)
     for (j=0; j<f; ++j) {
-      pi = p + i*n;
-      pj = p + j*n;
-      mul_0 (n, pi, pj, r);
-
-      for (k=0; k<f; ++k) {
-        found = 1;
-        for (l=0; l<n; ++l)
-          if (*(p+k*n+l) != *(r+l)) {
-            found = 0;
-            break;
-          }
-        if (found == 1) {
-          *(t+i*f+j) = k;
-          break;
-        }
-      }
+      i2p (n, i, p);
+      i2p (n, j, q);
+      mul_0 (n, p, q, r);
+      *(t+i*f+j) = p2i (n, r);
     }
-  free (r);
   return t;
 }
 
@@ -92,9 +34,7 @@ create_ctable (const int n) {
     return NULL;
   if (cayley_tables[n-1] != NULL)
     return cayley_tables[n-1];
-  symgr = gen_sym_group_1 (n);
-  cayley_tables[n-1] = cayley_table (n, symgr);
-  free (symgr);
+  cayley_tables[n-1] = cayley_table (n);
   return cayley_tables[n-1];
 }
 
@@ -130,4 +70,3 @@ mul_pp (const int n, const int i, const int j) {
     return -1;
   return *(t+i*f+j);
 }
-

@@ -275,3 +275,46 @@ i_to_s_c (const int size, int i) {
   return s;
 }
 
+/* a: n-sized array of int. */
+/* *p: an array of int. */
+
+/* a: 大きさが n の整数の配列 */
+/* *p: 整数の配列 */
+static void
+gen_sym_group_0 (const int n, int j, int a[], int **p) {
+  int i, swap;
+
+  if (j == n-1)
+    for (i=0; i<n; ++i)
+      *(*p)++ = a[i];
+  else {
+    for (i=j; i<n; ++i) {
+      swap = a[j];
+      a[j] = a[i];
+      a[i] = swap;
+      gen_sym_group_0 (n, j+1, a, p);
+    }
+    for (i=j; i<n-1; ++i) {
+      swap = a[i];
+      a[i] = a[i+1];
+      a[i+1] = swap;
+    }
+  }
+}
+
+/* Returns an array that contains the whole sorted permutations. */
+/* The array will have to be freed by the caller when it becomes useless. */
+
+/* n次の置換全体を昇順に並べた配列を返す。 */
+/* 配列は呼び出し側でメモリ解放する。 */
+int *
+gen_sym_group (const int n) {
+  int i, *p, *q;
+  int a[MAX_DEGREE];
+
+  for (i=0; i<MAX_DEGREE; ++i)
+    a[i] = i + 1;
+  p = q = (int *) malloc(sizeof(int)*n*fact(n));
+  gen_sym_group_0 (n, 0, a, &p);
+  return q;
+}

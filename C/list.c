@@ -6,8 +6,8 @@
 #include "subset.h"
 
 void *
-l_lookup (list *start, const void *o) {
-  list *l;
+l_lookup (const list *start, const void *o) {
+  list const *l;
 
   if (start == NULL)
     return NULL;
@@ -21,8 +21,8 @@ l_lookup (list *start, const void *o) {
 }
 
 void *
-l_lookup_with_cmp (list *start, const void *o, int (*cmp) (const void *, const void *)) {
-  list *l;
+l_lookup_with_cmp (const list *start, const void *o, int (*cmp) (const void *, const void *)) {
+  list const *l;
 
   if (start == NULL)
     return NULL;
@@ -61,6 +61,21 @@ l_append_s (list *start, void *o) {
   if ((o1 = l_lookup (start, o)) == o)
     return o;
   return l_append(start, o);
+}
+
+/* prepend is a bit faster than append */
+void *
+l_prepend (list *start, void *o) {
+  list *l;
+  void *o1;
+
+  if (start == NULL)
+    return NULL;
+  l = (list *) malloc (sizeof(list));
+  l->next = start->next;
+  l->o = o;
+  start->next = l;
+  return l->o;
 }
 
 void *
@@ -109,9 +124,9 @@ l_free_full_all (list *l, void (*free_o) (void *)) {
 /* l_size (&start); */
 /* error => -1 */
 int
-l_size (list *l) {
+l_size (const list *l) {
   int i;
-  list *l1;
+  const list *l1;
 
   if (l == NULL)
     return -1;
@@ -162,14 +177,13 @@ l_sort (list *l, int (*l_cmp)(const void *, const void *)) {
   n = l_size (l);
   o_array = l_l2a (l);
   qsort ((void *) o_array, (size_t) n, sizeof(void *), l_cmp);
-  l_a2l (l, o_array, n);  
+  l_a2l (l, o_array, n);
 }
 
 void
-l_each (list *l, void (* func) (void *)) {
-  list *l1;
+l_each (const list *l, void (* func) (void *)) {
+  list const *l1;
 
   for (l1=l; l1->next != NULL; l1=l1->next)
     func (l1->next->o);
 }
-

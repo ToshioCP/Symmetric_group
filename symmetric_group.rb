@@ -7,7 +7,7 @@
 
 require 'set'
 
-# Permutation belongs to the n-degree symmetric group. 
+# Permutation belongs to the n-degree symmetric group.
 # Ruby array has zero based indices on its arrays.
 # For example, a permutation [2,1,3] is implememted as an array p[0]=2, p[1]=1, p[2]=3.
 # The permutation maps 1=>2, 2=>1, 3=>3.
@@ -47,7 +47,7 @@ class Permutation < Array
     #  @c_ent[2]=4: points the first index of the second cycle.
     # @cycle: true if the permutation is a cycle.
     # @transposition: true if the permutation is a transposition.
- 
+
     # 巡回置換のための諸変数
     # @group=[1,1,0,0,2,2,2] 置換が[2,1,3,4,7,5,6]だった場合
     #  0: 置換で動かない要素 3=>3, 4=>4
@@ -113,7 +113,7 @@ class Permutation < Array
   # [2,3,1,5,4,6] => [[1,2,3],[4,5]]
   # Note that [6] (6 moves to 6 itself) isn't included to the array.
   # If self is an identity permutation, to_cycles returns an empty array.
- 
+
   # 巡回置換に分解し、それらを配列で返す
   # [2,3,1,5,4,6] => [[1,2,3],[4,5]]
   # このとき、自分自身に写る6は巡回置換にならないことに注意
@@ -145,7 +145,7 @@ class Permutation < Array
   def mapsto x
     raise "Illegal argument" unless x.instance_of? Integer
     raise "Illegal argument" unless x>=1 and x<=self.size
-    self[x-1]    
+    self[x-1]
   end
 
   # multiplication
@@ -194,7 +194,7 @@ class Permutation < Array
 
   # creates a tex-formated string
 
-  # texフォーマットの文字列を返す 
+  # texフォーマットの文字列を返す
   def to_tex
     n=self.size
     h=(n+1)/2-1
@@ -208,18 +208,18 @@ class Permutation < Array
         s << "#{self[i]}& &#{i+1}\\\\"
       end
     end
-    s <<"\\end{bmatrix}"
+    s << "\\end{bmatrix}"
   end
 
 end
 
 # n-degree symmetric group, which is a group consists of all the n-permutations.
-# It is a sorted array of the permutations. 
+# It is a sorted array of the permutations.
 # The elements (permutations) of the array are referenced by the index.
 #   sg: an instance of Symmetric_group class, p: an instance of Permutation class
 #   a permutation to an index => sg.index(p)
 #   an index to a permutation => sg[i]
-# So, a premutation and its index can be seen as the same thing. 
+# So, a premutation and its index can be seen as the same thing.
 # An instance of the Symmetric_group class makes a Ceyley table in it.
 # Multiplication of permutations can be calculated fast with the table.
 
@@ -233,7 +233,7 @@ end
 # インスタンスは生成されるときに演算表を内部に作る。
 # 演算表を用いてることにより、高速に置換の積を計算することができる。
 class Symmetric_group < Array
-  # Symmetric_group.new(2) => [[1,2],[2,1]] 
+  # Symmetric_group.new(2) => [[1,2],[2,1]]
   def initialize n
     raise "Illegal argument." unless n.instance_of? Integer
     raise "Illegal argument." unless n >= 1
@@ -355,4 +355,3 @@ class Symmetric_group < Array
     end
   end
 end
-

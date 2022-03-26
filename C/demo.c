@@ -29,4 +29,3 @@ main (int argc, char **argv) {
   t = difftime (t2, t1);
   printf ("%f\n", t);
 }
-

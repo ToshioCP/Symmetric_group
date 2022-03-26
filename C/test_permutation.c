@@ -150,10 +150,45 @@ printf ("i_to_s_c\n");
   if ((s = i_to_s_c(6, 341)) == NULL || strcmp(s, "[1,3][2,6][4,5]") != 0) /* {3,6,1,5,4,2} */
     printf ("i_to_s_c didn't work. (2)\n");
   free (s);
+printf ("gen_sym_group\n");
+  int *sym;
+  for (n=1; n<=MAX_DEGREE; ++n) {
+    sym = gen_sym_group (n);
+    for (i=0; i<fact(n); ++i)
+      for (j=0; j<n; ++j)
+        switch (n) {
+        case 1:
+          if (*(sym+i*n+j) != s1[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=1)\n");
+          break;
+        case 2:
+          if (*(sym+i*n+j) != s2[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=2)\n");
+          break;
+        case 3:
+          if (*(sym+i*n+j) != s3[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=3)\n");
+          break;
+        case 4:
+          if (*(sym+i*n+j) != s4[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=4)\n");
+          break;
+        case 5:
+          if (*(sym+i*n+j) != s5[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=5)\n");
+          break;
+        case 6:
+          if (*(sym+i*n+j) != s6[i][j])
+            printf ("gen_sym_group_1 didn't work. (n=6)\n");
+          break;
+        default:
+          break;
+        }
+    free (sym);
+  }
 }
 
 int
 main (int argvc, char **argv) {
   test();
 }
-

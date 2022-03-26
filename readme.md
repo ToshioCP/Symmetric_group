@@ -35,7 +35,8 @@ $ ./a.out
 
 1. Start the terminal and move the current directory to the directory where you unzipped the zip file.
 2. Type: ruby demo.rb
-3. demo2.rb prints all the subgroups of S5. It takes about 80 seconds. (Core-i7 laptop)
+3. demo2.rb prints all the subgroups of S5. It takes about 36 seconds. (Core-i7 laptop)
+4. C/demo.c prints all the subgroups from S1 to S5. It takes about 5 seconds.
 
 ### License
 
@@ -81,7 +82,8 @@ $ ./a.out
 
 1. 解凍したフォルダで端末（コマンドライン）を起動する。
 2. ruby demo.rb とタイプする。
-3. demo2.rbは5次対称群のすべての部分群を表示します。約80秒かかります。（Core-i7のノートPCで）
+3. demo2.rbは5次対称群のすべての部分群を表示します。約36秒かかります。（Core-i7のノートPCで）
+4. C/demo.cは1から5次の対称群すべての部分群を表示します。約5秒かかります。
 
 ### ライセンス
 
@@ -91,4 +93,3 @@ Copyright (C) 2022  ToshioCP (関谷 敏雄)
 
 このプログラムは有用であることを願って頒布されますが、*全くの無保証* です。商業可能性の保証や特定の目的への適合性は、言外に示されたものも含め全く存在しません。
 詳しくは[GNU 一般公衆利用許諾書(英語)](https://www.gnu.org/licenses/gpl-3.0.en.html)、またはその日本語訳[GNU 一般公衆利用許諾書の日本語訳](https://gpl.mhatta.org/gpl.ja.html)をご覧ください。
-

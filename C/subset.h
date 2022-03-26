@@ -9,6 +9,9 @@ struct _subset {
 };
 
 int
+hash (const void *set);
+
+int
 is_set (const subset *set);
 
 void
@@ -19,9 +22,6 @@ set_finalize (void);
 
 subset *
 set_create_set (const int degree, const int n, const int a[]);
-
-void
-set_free_set (subset *set);
 
 int
 set_get_degree (const subset *set);

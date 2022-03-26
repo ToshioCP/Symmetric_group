@@ -7,7 +7,7 @@
 
 require 'benchmark'
 include Benchmark
- 
+
 require './symmetric_group.rb'
 
 def find_supergroup(cgroups)
@@ -52,4 +52,3 @@ Benchmark.benchmark(CAPTION, 15, FORMAT) do |x|
     $stdout.reopen stdout_old
   end
 end
-

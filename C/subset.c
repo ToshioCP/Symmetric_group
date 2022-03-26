@@ -4,14 +4,25 @@
 
 #include "permutation.h"
 #include "cayley.h"
-#include "list.h"
+#include "hash.h"
 #include "subset.h"
 
 #include "compile_option.h"
 
 extern int no_check;
 
-static list start[MAX_DEGREE]; /* initialized with 0 */
+static list **ht = NULL;
+
+int
+hash (const void *set) {
+  const subset *set1 = (const subset *) set;
+  int i;
+  long h;
+
+  for (i=h=0; i<set1->n; ++i)
+    h = (h * 31 + set1->a[i]) % HASHSIZE;
+  return (int) h;
+}
 
 static int
 is_set0 (const int degree, const int n, const int set[]) {
@@ -53,17 +64,14 @@ set_free_set0 (subset *set) {
     free (set->a);
   free (set);
 }
-/* Free all the subsets and lists. */
-/* Users call this function at the end of the program. */
 
-/* subsetのメモリをすべて解放し、リストのメモリも解放する。 */
-/* プログラムの最後で呼び出す。 */
 void
 set_finalize (void) {
   int i;
 
-  for (i=0; i<MAX_DEGREE; ++i)
-    l_free_full_all (&start[i], (void (*) (void *)) set_free_set0);
+  if (ht == NULL)
+    return;
+  h_reset_full (ht, (void (*) (void *)) set_free_set0);
 }
 
 /* degree: the degree of the symmetric group contains the subsets */
@@ -76,10 +84,12 @@ set_finalize (void) {
 subset *
 set_create_set (const int degree, const int n, const int a[]) {
   subset *set, *set1;
-  int i, stat;
-  list *l;
+  int i;
+
   if (is_set0 (degree, n, a) == 0)
     return NULL;
+  if (ht == NULL)
+    ht = h_init ();
   set = (subset *) malloc(sizeof(subset));
   set->degree = degree;
   set->n = n;
@@ -90,30 +100,13 @@ set_create_set (const int degree, const int n, const int a[]) {
     for (i=0; i<n; ++i)
       *(set->a + i) = a[i];
   }
-  if ((set1 = l_lookup_with_cmp (&(start[degree-1]), set, (int (*) (const void *, const void *)) set_cmp)) != NULL) {
-    free (set->a);
-    free (set);
+  if ((set1 = h_lookup_with_cmp (ht, set, (int (*) (const void *, const void *)) set_cmp)) != NULL) {
+    set_free_set0 (set);
     return set1;
-  } else if ((set1 = l_append_s (&(start[degree-1]), set)) == NULL) {
-    free (set->a);
-    free (set);
-    return NULL;
   } else {
+    h_install (ht, set);
     return set;
   }
-}
-
-/* Usually, users don't need to use this function. */
-
-/* ユーザがこの関数を使う必要はない。 */
-void
-set_free_set (subset *set) {
-  if (is_set (set) == 0)
-    return;
-  l_remove (&start[set->degree-1], set);
-  if (set->a != NULL)
-    free (set->a);
-  free (set);
 }
 
 int
@@ -152,7 +145,7 @@ set_include (const subset *set, int i) {
   return 0;
 }
 
-/* Is set1 a subset of set2? */ 
+/* Is set1 a subset of set2? */
 /* yes => 1, no => 0, error => -1 */
 int
 set_is_subset (subset *set1, subset *set2) {
@@ -418,7 +411,7 @@ concat (const char *s1, const char *s2) {
   s = strcpy (s, s1);
   s = strcat (s, s2);
   return s;
-} 
+}
 
 /* The returned string will have to be freed when it becomes useless. */
 char *
@@ -492,4 +485,3 @@ set_to_s_c (const subset *set) {
   }
   return s;
 }
-

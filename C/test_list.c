@@ -83,6 +83,14 @@ printf ("l_append_s\n");
       printf ("l_append_s didn't work. 3-%d\n", i);
   if (l_size (&start) != 6)
     printf ("l_append_s didn't work. 4\n");
+    l_free_all (&start);
+printf ("l_prepend\n");
+  for (i=0; i<6; ++i)
+    if (l_prepend (&start, ss[i]) != ss[i])
+      printf ("l_prepend didn't work. 1-%d\n", i);
+  for (i=0, l=&start; i<6; ++i, l=l->next)
+    if (l==NULL || l->next==NULL || (subset *)(l->next->o) != ss[5-i])
+      printf ("l_prepend didn't work. 2-%d\n", i);
 printf ("l_remove\n");
   if (l_remove (&start, ss[0]) == NULL)
     printf ("l_remove didn't work. 1\n");
@@ -113,7 +121,7 @@ printf ("l_free_full_all\n");
   for (i=0; i<6; ++i)
     if (l_append (&start, ss[i]) != ss[i])
       printf ("l_append didn't work. 6-%d\n", i);
-  l_free_full_all (&start, (void (*) (void *)) set_free_set);
+  l_free_full_all (&start, (void (*) (void *)) set_free_set0);
   if (start.next != NULL)
     printf ("l_free_full_all didn't work. 1\n");
 printf ("l_l2a\n");
@@ -163,11 +171,10 @@ printf ("l_each\n");
     if (l_append (&start, ss[i]) != ss[i])
       printf ("l_append didn't work. (i_each) %d\n", i);
   l_each (&start, (void (*) (void *)) each_test_1);
-  l_free_full_all (&start, (void (*) (void *)) set_free_set);
+  l_free_full_all (&start, (void (*) (void *)) set_free_set0);
 }
 
 int
 main (int argc, char **argv) {
   test();
 }
-

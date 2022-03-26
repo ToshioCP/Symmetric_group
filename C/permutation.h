@@ -48,3 +48,5 @@ i_to_s (int size, int i);
 char *
 i_to_s_c (int size, int i);
 
+int *
+gen_sym_group (const int n);

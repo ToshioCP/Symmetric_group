@@ -41,33 +41,8 @@ printf ("is_set0\n");
   for (i=0; i<6;++i)
     if (is_set0 (i, size[i], b[i]) != 0)
       printf ("is_set0 didn't work(2).\n");
-printf ("l_append & l_lookup in subset.c\n");
-  /* create a set by hand */
-  subset *set = (subset *) malloc (sizeof(subset));
-  int *ar = (int *) malloc (sizeof(int)*3);
-  for (i=0; i<3; ++i)
-    *(ar+i) = a[2][i];
-  set->degree = 3;
-  set->n = 3;
-  set->a = ar;
-  if (l_append (&start[set->degree-1], set) != set)
-    printf ("l_append didn't work.\n");
-  if (l_lookup (&start[set->degree-1], set) != set)
-    printf ("l_lookup didn't work.\n");
-printf ("l_remove in subset.c\n");
-  if (l_remove (&start[set->degree-1], set) != set)
-    printf ("l_remove didn't work. 1\n");
-  if (l_lookup (&start[set->degree-1], set) != NULL)
-    printf ("l_remove didn't work. 2\n");
-printf ("l_free_full_all\n");
-  if (l_append (&start[set->degree-1], set) != set)
-    printf ("l_append didn't work. (l_free_full_all)\n");
-  l_free_full_all (&start[set->degree-1], (void (*) (void *)) set_free_set0);
-  if (start[2].next != NULL)
-    printf ("l_free_full_all didn't work.\n");
-  start[2].next = NULL;
 printf ("set_create_set\n");
-  subset *set0;
+  subset *set, *set0;
   set = set_create_set (5, 5, a[4]);
   if (set == NULL)
     printf ("set_create_set didn't work(1).\n");
@@ -81,19 +56,19 @@ printf ("set_create_set\n");
   set0 = set_create_set (5, 5, a[4]);
   if (set != set0)
     printf ("set_create_set didn't work(5).\n");
-  set = set_create_set (5, 5, b[4]);
-  if (set != NULL) {
-    printf ("set_create_set didn't work(6).\n");
-    set_free_set (set);
-  }
 printf ("set_finalize\n");
-  for (i=0; i<6; ++i)
-    if (set_create_set (6, size[i], a[i]) == NULL)
+  for (i=0; i<6; ++i) {
+    if ((set = set_create_set (6, size[i], a[i])) == NULL)
       printf ("set_create_set didn't work. (set_finalize %d)\n", i);
-  set_finalize ();
-  for (i=0; i<6; ++i)
-    if (start[i].next != NULL)
+    set_finalize ();
+    set = (subset *) malloc (sizeof(subset));
+    set->degree = 6;
+    set->n = size[i];
+    set->a = a[i];
+    if (h_lookup_with_cmp (ht, set, (int (*) (const void *, const void *)) set_cmp) != NULL)
       printf ("set_finalize didn't work. %d\n", i);
+    free (set);
+  }
 printf ("is_set\n");
   set = set_create_set (3, 3, a[2]);
   if (is_set (set) != 1)
@@ -314,5 +289,5 @@ printf ("set_to_s_c\n");
 int
 main (int argvc, char **argv) {
   test();
+  return 0;
 }
-

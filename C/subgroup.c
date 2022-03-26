@@ -4,8 +4,7 @@
 #include "cayley.h"
 #include "list.h"
 #include "subset.h"
-
-static list start = {NULL, NULL};
+#include "hash.h"
 
 /* yes=>1, no->0, error^>-1 */
 int
@@ -16,8 +15,7 @@ set_is_subgroup (const subset *set) {
   if (is_set (set) == 0)
     return -1;
   set1 = set_mul_ss (set, set);
-  stat = set_cmp (set, set1) == 0 ? 1 : 0;
-  return stat;
+  return (set == set1);
 }
 
 /* Create a symmetric group. */
@@ -120,9 +118,7 @@ set_gen_group (subset *set) {
   for (set1 = set; ; ) {
     if ((set2 = set_mul_ss (set1, set1)) == NULL) /* error */
       return NULL;
-    if ((stat = set_cmp (set1, set2)) == -2) /* error */
-      return NULL;
-    if (stat == 0)
+    if (set1 == set2)
       break;
     set3 = set_union (set1, set2);
     set1 = set3;
@@ -154,6 +150,8 @@ gen_cyclic_group (int degree, int i) {
   return set_create_set (degree, k, p);
 }
 
+static list **ht = NULL;
+
 /* find intermediate groups between symgr and set. */
 
 /* symgrとsetの中間群を探す */
@@ -178,10 +176,11 @@ find_intermediate_group (const int n, list *cgroups_0) {
         l_free_all (&cgroups);
         return;
       }
-      l_append_s (&cgroups, set2);
+      if (h_lookup (ht, set2) == NULL) {
+        h_install (ht, set2);
+        l_append_s (&cgroups, set2);
+      }
     }
-  for (l1=&cgroups; l1->next!=NULL; l1=l1->next)
-    l_append_s (&start, l1->next->o);
   find_intermediate_group (n, &cgroups);
   l_free_all (&cgroups);
 }
@@ -199,24 +198,33 @@ find_subgroups (const int n) {
     return;
   if ((symgr = set_create_symgr (n)) == NULL)
     return;
-  l_free_all (&start);
-  l_append_s (&start, symgr);
+  if (ht == NULL)
+    ht = h_init ();
+  else
+    h_reset (ht);
+  h_install (ht, symgr);
   a[0] = 0;
   if ((set1 = set_create_set (n, 1, a)) == NULL)
     return;
-  l_append_s (&start, set1);
+  h_install (ht, set1);
   f = fact (n);
   for (i=1; i<f; ++i) {
     if ((set1 = gen_cyclic_group (n, i)) == NULL) {
       l_free_all (&cgroups);
       return;
     }
-    l_append_s (&cgroups, set1);
+    if (h_lookup (ht, set1) == NULL) {
+      h_install (ht, set1);
+      l_append_s (&cgroups, set1);
+    }
   }
-  for (l=&cgroups; l->next!=NULL; l=l->next)
-    l_append_s (&start, l->next->o);
   find_intermediate_group (n, &cgroups);
   l_free_all (&cgroups);
+}
+
+int
+n_subgroups (void) {
+  return h_size (ht);
 }
 
 static void
@@ -224,13 +232,7 @@ each_print_c (subset *set) {
   printf ("%s\n",set_to_s_c (set));
 }
 
-int
-n_subgroups (void) {
-  return l_size (&start);
-}
-
 void
 print_subgroups (void) {
-  l_each (&start, (void (*) (void *)) each_print_c);
+  h_each (ht, (void (*) (void *)) each_print_c);
 }
-
