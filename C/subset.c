@@ -19,7 +19,8 @@ hash (const void *set) {
   int i;
   long h;
 
-  for (i=h=0; i<set1->n; ++i)
+  h = set1->degree * 31 + set1->n;
+  for (i=0; i<set1->n; ++i)
     h = (h * 31 + set1->a[i]) % HASHSIZE;
   return (int) h;
 }
