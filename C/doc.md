@@ -32,12 +32,12 @@ The permutation where 1 => 2,2 => 3,3 => 1 is written as p[2,3,1].
 The symmetric group of degree 3 is denoted by S3.
 The elements of S3 are:
 
---p[1,2,3]
---p[1,3,2]
---p[2,1,3]
---p[2,3,1]
---p[3,1,2]
---p[3,2,1]
+- p[1,2,3]
+- p[1,3,2]
+- p[2,1,3]
+- p[2,3,1]
+- p[3,1,2]
+- p[3,2,1]
 
 The above six permutations are sorted by lexicographic order.
 Similarly, the elements of the symmetric group of degree n can be arranged in lexicographic order.
